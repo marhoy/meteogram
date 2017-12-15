@@ -12,7 +12,7 @@ def plot_temp(t, y, ax=None):
         ax = plt.gca()
 
     t_fine_res = np.linspace(t[0], t[-1], 1000)
-    y_smooth = scipy.signal.savgol_filter(y, 7, 2)
+    y_smooth = scipy.signal.savgol_filter(y, 5, 0)
     y_fine_res = scipy.interpolate.interp1d(t, y_smooth, kind='cubic')(t_fine_res)
 
     # Create a colormap for red, green and blue and a norm to color

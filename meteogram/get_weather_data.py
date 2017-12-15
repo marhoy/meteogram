@@ -1,3 +1,6 @@
+import datetime
+
+import matplotlib.dates
 import pandas as pd
 import requests
 from bs4 import BeautifulSoup
@@ -5,7 +8,9 @@ from bs4 import BeautifulSoup
 from . import constants
 
 
-def get_hourly_forecast(url=constants.HOURLY_URL):
+def get_hourly_forecast(place=constants.PLACE):
+
+    url = url + 'varsel_time_for_time.xml'
     response = requests.get(url)
     soup = BeautifulSoup(response.text, 'lxml')
 
@@ -35,10 +40,12 @@ def get_hourly_forecast(url=constants.HOURLY_URL):
     df['wind_speed'] = df['wind_speed'].astype(float)
     df['pressure'] = df['pressure'].astype(float)
 
+    df['from_mpl'] = matplotlib.dates.date2num(df['from'].astype(datetime.datetime))
+    df['to_mpl'] = matplotlib.dates.date2num(df['to'].astype(datetime.datetime))
     return df
 
 
-def get_precip_now(url=constants.NOW_URL):
+def get_precip_now(place=constants.PLACE):
     response = requests.get(url)
     soup = BeautifulSoup(response.text, 'lxml')
 
