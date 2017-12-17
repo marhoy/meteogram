@@ -1,6 +1,7 @@
 import locale as python_locale
 
 import matplotlib
+matplotlib.use('Agg')
 import matplotlib.dates
 import matplotlib.pyplot as plt
 import numpy as np
@@ -14,7 +15,6 @@ from matplotlib.ticker import MaxNLocator
 from . import constants
 from . import get_weather_data
 
-matplotlib.use('Agg')
 
 
 def meteogram(place=constants.DEFAULT_PLACE, hours=constants.DEFAULT_HOURS,
