@@ -36,7 +36,6 @@ def download_wind_arrows(download_dir=constants.WIND_SYMBOLS_DIR):
 
 
 def download_weather_symbols(download_dir=constants.WEATHER_SYMBOLS_DIR):
-
     if not os.path.isdir(download_dir):
         os.makedirs(download_dir, exist_ok=True)
     else:
