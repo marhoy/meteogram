@@ -15,7 +15,7 @@ from matplotlib.ticker import MaxNLocator
 from . import constants
 from . import get_weather_data
 
-
+import os
 
 def meteogram(place=constants.DEFAULT_PLACE, hours=constants.DEFAULT_HOURS,
               symbol_interval=constants.DEFAULT_SYMBOL_INTERVAL, locale=constants.DEFAULT_LOCALE):
@@ -90,7 +90,7 @@ def add_weather_symbols(df, ax=None, symbol_interval=3):
     y_pos = ax.get_ylim()[1] - .1 * (ax.get_ylim()[1] - ax.get_ylim()[0])
     for index, row in df.iterrows():
         if divmod(row['from'].hour, symbol_interval)[1] == 0:
-            sym = constants.symbol_dir + row['symbol'] + '.png'
+            sym = os.path.join(constants.symbol_dir, row['symbol'] + '.png')
             img = plt.imread(sym, format='png')
             imagebox = OffsetImage(img, zoom=1)
             ab = AnnotationBbox(imagebox, (row['from_mpl'] + 0.5/24, y_pos), frameon=False)
