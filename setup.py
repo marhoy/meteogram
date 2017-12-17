@@ -2,14 +2,22 @@ from setuptools import setup
 
 setup(
     name='meteogram',
-    version='',
+    version='0.902',
     packages=['meteogram'],
     url='',
     license='',
     author='Martin Høy',
     author_email='martin.hoy@pvv.ntnu.no',
     description='Create meteogram based on data from yr.no',
-    install_requires=['matplotlib', 'numpy', 'scipy', 'pandas', 'requests', 'bs4', 'flask']
+    install_requires=['matplotlib', 'numpy', 'scipy', 'pandas', 'requests', 'bs4', 'flask'],
+    package_data={'meteogram': ['weather_symbols/*.png']},
+
+    entry_points={
+        'console_scripts': [
+            'meteogram-server=meteogram.flask_server:main',
+        ]
+    },
+
 )
 
 #
