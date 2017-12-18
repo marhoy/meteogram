@@ -6,12 +6,12 @@ import meteogram
 def main():
     parser = argparse.ArgumentParser(
         description='Create a meteogram for a given location.')
-    parser.add_argument('-p', '--place', default='Norway/Oslo/Oslo/Godlia',
+    parser.add_argument('-p', '--place', default=meteogram.DEFAULT_PLACE,
                         help='The yr.no place to generate meteogram for')
-    parser.add_argument('-t', '--hours', type=int, default=18,
+    parser.add_argument('-t', '--hours', type=int, default=meteogram.DEFAULT_HOURS,
                         help='How many hours to forecast')
-    parser.add_argument('-s', '--symbol-interval', type=int, default=3)
-    parser.add_argument('-l', '--locale', default='en_US.UTF-8')
+    parser.add_argument('-s', '--symbol-interval', type=int, default=meteogram.DEFAULT_SYMBOL_INTERVAL)
+    parser.add_argument('-l', '--locale', default=meteogram.DEFAULT_LOCALE)
     parser.add_argument('-o', '--output-file', default='meteogram.png')
     arguments = parser.parse_args()
 

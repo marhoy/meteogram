@@ -97,7 +97,7 @@ def add_weather_symbols(df, ax=None, symbol_interval=3):
     y_pos = ax.get_ylim()[1] - .1 * (ax.get_ylim()[1] - ax.get_ylim()[0])
     for index, row in df.iterrows():
         if divmod(row['from'].hour, symbol_interval)[1] == 0:
-            sym = os.path.join(constants.WEATHER_SYMBOL_DIR, row['symbol'] + '.png')
+            sym = os.path.join(constants.WEATHER_SYMBOLS_DIR, row['symbol'] + '.png')
             img = plt.imread(sym, format='png')
             imagebox = OffsetImage(img, zoom=1)
             ab = AnnotationBbox(imagebox, (row['from_mpl'] + 0.5/24, y_pos), frameon=False)
@@ -106,7 +106,7 @@ def add_weather_symbols(df, ax=None, symbol_interval=3):
 
 def format_axes(ax1, ax2):
     days = matplotlib.dates.DayLocator()
-    noon = matplotlib.dates.HourLocator(byhour=range(12, 24, 12))
+    # noon = matplotlib.dates.HourLocator(byhour=range(12, 24, 12))
     day_format = matplotlib.dates.DateFormatter('%A')
     hours = matplotlib.dates.HourLocator(byhour=range(0, 24, 3))
     hours_format = matplotlib.dates.DateFormatter('%H')
