@@ -7,7 +7,7 @@ import requests
 from . import constants
 
 
-def download_wind_arrows(download_dir=constants.WIND_SYMBOLS_DIR):
+def download_wind_arrows():
     if not os.path.isdir(download_dir):
         os.makedirs(download_dir, exist_ok=True)
     else:
@@ -35,7 +35,7 @@ def download_wind_arrows(download_dir=constants.WIND_SYMBOLS_DIR):
     open(os.path.join(download_dir, filename), 'wb').write(r.content)
 
 
-def download_weather_symbols(download_dir=constants.WEATHER_SYMBOLS_DIR):
+def download_weather_symbols():
     if not os.path.isdir(download_dir):
         os.makedirs(download_dir, exist_ok=True)
     else:

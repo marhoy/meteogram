@@ -4,9 +4,9 @@
 DEFAULT_PLACE = 'Norway/Oslo/Oslo/Godlia'
 DEFAULT_HOURS = 18
 DEFAULT_SYMBOL_INTERVAL = 3
-DEFAULT_LOCALE = 'no_NO.UTF-8'
+DEFAULT_LOCALE = 'en_US.UTF-8'
 
-WIND_SYMBOLS_DIR = 'symbols_wind'
-WEATHER_SYMBOLS_DIR = 'symbols_weather'
+# WIND_SYMBOLS_DIR = 'symbols_wind'
+# WEATHER_SYMBOLS_DIR = 'symbols_weather'
 
-symbol_dir = 'meteogram/weather_symbols/'
+symbol_dir_weather = 'meteogram/weather_symbols/'
