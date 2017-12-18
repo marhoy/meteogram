@@ -8,3 +8,7 @@ DEFAULT_SYMBOL_INTERVAL = 3
 DEFAULT_LOCALE = 'en_US.UTF-8'
 
 WEATHER_SYMBOLS_DIR = _pkg_resources.resource_filename(__name__, 'weather_symbols')
+
+DEFAULT_DPI = 90
+DEFAULT_SIZE_H = 392
+DEFAULT_SIZE_V = 234

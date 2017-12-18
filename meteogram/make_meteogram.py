@@ -1,15 +1,15 @@
 import locale as python_locale
 import os
 
-import matplotlib
-matplotlib.use('Agg')
 import matplotlib.dates
-import matplotlib.pyplot as plt
+import matplotlib.image
 import numpy as np
 import scipy.interpolate
 import scipy.signal
+from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.collections import LineCollection
 from matplotlib.colors import ListedColormap, BoundaryNorm
+from matplotlib.figure import Figure
 from matplotlib.offsetbox import OffsetImage, AnnotationBbox
 from matplotlib.ticker import MaxNLocator
 
@@ -19,27 +19,27 @@ from . import get_weather_data
 
 def meteogram(place=constants.DEFAULT_PLACE, hours=constants.DEFAULT_HOURS,
               symbol_interval=constants.DEFAULT_SYMBOL_INTERVAL, locale=constants.DEFAULT_LOCALE):
-
     python_locale.setlocale(python_locale.LC_ALL, locale)
 
     data = get_weather_data.get_hourly_forecast(place=place)
     data = data[:hours]
 
-    fig, ax1 = plt.subplots(1, 1, figsize=(3.92, 2.34))
+    fig_size = (constants.DEFAULT_SIZE_H / constants.DEFAULT_DPI,
+                constants.DEFAULT_SIZE_V / constants.DEFAULT_DPI)
+    fig = Figure(figsize=fig_size, dpi=constants.DEFAULT_DPI)
+    FigureCanvas(fig)
+    ax1 = fig.add_subplot(111)
     ax2 = ax1.twinx()
 
     plot_temp(data, ax1)
     plot_precipitation(data, ax2)
     format_axes(ax1, ax2)
     add_weather_symbols(data, ax=ax1, symbol_interval=symbol_interval)
-    plt.tight_layout(pad=0.2)
+    fig.tight_layout(pad=0.2)
     return fig
 
 
-def plot_temp(df, ax=None):
-    if ax is None:
-        ax = plt.gca()
-
+def plot_temp(df, ax):
     t = df['from_mpl'].values
     y = df['temp'].values
 
@@ -68,10 +68,7 @@ def plot_temp(df, ax=None):
     ax.add_collection(lc)
 
 
-def plot_precipitation(df, ax=None):
-    if ax is None:
-        ax = plt.gca()
-
+def plot_precipitation(df, ax):
     t = df['from_mpl']
     y = df['precip']
     y_min = df['precip_min']
@@ -85,22 +82,19 @@ def plot_precipitation(df, ax=None):
     for bar in bars:
         height = bar.get_height()
         if height > 0:
-            ax.text(bar.get_x() + bar.get_width()/2, bar.get_height()*1.05,
+            ax.text(bar.get_x() + bar.get_width() / 2, bar.get_height() * 1.05,
                     "{:3.1f}".format(bar.get_height()),
                     ha='center', size='xx-small')
 
 
-def add_weather_symbols(df, ax=None, symbol_interval=3):
-    if ax is None:
-        ax = plt.gca()
-
+def add_weather_symbols(df, ax, symbol_interval=3):
     y_pos = ax.get_ylim()[1] - .1 * (ax.get_ylim()[1] - ax.get_ylim()[0])
     for index, row in df.iterrows():
         if divmod(row['from'].hour, symbol_interval)[1] == 0:
             sym = os.path.join(constants.WEATHER_SYMBOLS_DIR, row['symbol'] + '.png')
-            img = plt.imread(sym, format='png')
+            img = matplotlib.image.imread(sym, format='png')
             imagebox = OffsetImage(img, zoom=1)
-            ab = AnnotationBbox(imagebox, (row['from_mpl'] + 0.5/24, y_pos), frameon=False)
+            ab = AnnotationBbox(imagebox, (row['from_mpl'] + 0.5 / 24, y_pos), frameon=False)
             ax.add_artist(ab)
 
 

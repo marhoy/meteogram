@@ -14,12 +14,12 @@ def _create_url(place=constants.DEFAULT_PLACE):
 
 
 def get_hourly_forecast(place=constants.DEFAULT_PLACE):
-
     url = _create_url(place) + '/varsel_time_for_time.xml'
     response = requests.get(url)
     soup = BeautifulSoup(response.text, 'lxml')
 
-    column_names = ['from', 'to', 'symbol', 'temp', 'precip', 'precip_min', 'precip_max', 'wind_dir', 'wind_speed', 'pressure']
+    column_names = ['from', 'to', 'symbol', 'temp', 'precip', 'precip_min', 'precip_max',
+                    'wind_dir', 'wind_speed', 'pressure']
     df = pd.DataFrame(columns=column_names)
 
     for time in soup.tabular.find_all("time"):
@@ -56,7 +56,6 @@ def get_hourly_forecast(place=constants.DEFAULT_PLACE):
 
 
 def get_precip_now(place=constants.DEFAULT_PLACE):
-
     url = _create_url(place) + '/varsel_nu.xml'
     response = requests.get(url)
     soup = BeautifulSoup(response.text, 'lxml')
