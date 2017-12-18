@@ -1,4 +1,4 @@
-import locale as python_locale
+import os
 
 import matplotlib
 matplotlib.use('Agg')
@@ -15,12 +15,11 @@ from matplotlib.ticker import MaxNLocator
 from . import constants
 from . import get_weather_data
 
-import os
 
 def meteogram(place=constants.DEFAULT_PLACE, hours=constants.DEFAULT_HOURS,
               symbol_interval=constants.DEFAULT_SYMBOL_INTERVAL, locale=constants.DEFAULT_LOCALE):
 
-    python_locale.setlocale(python_locale.LC_ALL, locale)
+    # python_locale.setlocale(python_locale.LC_ALL, locale)
 
     data = get_weather_data.get_hourly_forecast(place=place)
     data = data[:hours]
