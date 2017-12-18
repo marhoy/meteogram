@@ -15,6 +15,7 @@ setup(
     entry_points={
         'console_scripts': [
             'meteogram-server=meteogram.flask_server:main',
+            'meteogram-tofile=meteogram.commandline_script:main'
         ]
     },
 

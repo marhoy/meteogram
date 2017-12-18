@@ -1,3 +1,4 @@
+import os
 
 # YR_URL = 'https://www.yr.no/place/Norway/Oslo/Oslo/Godlia/'
 
@@ -9,4 +10,5 @@ DEFAULT_LOCALE = 'en_US.UTF-8'
 # WIND_SYMBOLS_DIR = 'symbols_wind'
 # WEATHER_SYMBOLS_DIR = 'symbols_weather'
 
-symbol_dir_weather = 'meteogram/weather_symbols/'
+_install_root = os.path.abspath(os.path.dirname(__file__))
+WEATHER_SYMBOL_DIR = os.path.join(_install_root, 'weather_symbols')

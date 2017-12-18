@@ -1,3 +1,4 @@
+import locale as python_locale
 import os
 
 import matplotlib
@@ -19,7 +20,7 @@ from . import get_weather_data
 def meteogram(place=constants.DEFAULT_PLACE, hours=constants.DEFAULT_HOURS,
               symbol_interval=constants.DEFAULT_SYMBOL_INTERVAL, locale=constants.DEFAULT_LOCALE):
 
-    # python_locale.setlocale(python_locale.LC_ALL, locale)
+    python_locale.setlocale(python_locale.LC_ALL, locale)
 
     data = get_weather_data.get_hourly_forecast(place=place)
     data = data[:hours]
@@ -89,7 +90,7 @@ def add_weather_symbols(df, ax=None, symbol_interval=3):
     y_pos = ax.get_ylim()[1] - .1 * (ax.get_ylim()[1] - ax.get_ylim()[0])
     for index, row in df.iterrows():
         if divmod(row['from'].hour, symbol_interval)[1] == 0:
-            sym = os.path.join(constants.symbol_dir_weather, row['symbol'] + '.png')
+            sym = os.path.join(constants.WEATHER_SYMBOL_DIR, row['symbol'] + '.png')
             img = plt.imread(sym, format='png')
             imagebox = OffsetImage(img, zoom=1)
             ab = AnnotationBbox(imagebox, (row['from_mpl'] + 0.5/24, y_pos), frameon=False)
