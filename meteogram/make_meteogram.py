@@ -77,10 +77,17 @@ def plot_precipitation(df, ax=None):
     y_min = df['precip_min']
     y_max = df['precip_max']
 
-    ax.bar(t, y, align='edge', color='C0', alpha=0.5, width=1 / 24)
+    bars = ax.bar(t, y, align='edge', color='C0', alpha=0.5, width=1 / 24)
     ax.bar(t, y_min, align='edge', color='C0', alpha=0.3, width=1 / 24)
     ax.bar(t, y_max, align='edge', color='C0', alpha=0.2, width=1 / 24)
     ax.set_ylim(bottom=0, top=2)
+
+    for bar in bars:
+        height = bar.get_height()
+        if height > 0:
+            ax.text(bar.get_x() + bar.get_width()/2, bar.get_height()*1.05,
+                    "{:3.1f}".format(bar.get_height()),
+                    ha='center', size='xx-small')
 
 
 def add_weather_symbols(df, ax=None, symbol_interval=3):
@@ -121,7 +128,9 @@ def format_axes(ax1, ax2):
 
     ax1.grid(which='major', alpha=1, linestyle='--')
     ax1.grid(which='minor', alpha=0.2, linestyle=':')
-    ax1.axhline(0, color='black', linestyle=':', alpha=0.7)
+
+    if (ax1.get_ylim()[0] < 0) & (ax1.get_ylim()[1] > 0):
+        ax1.axhline(0, color='black', linestyle=':', alpha=0.7)
 
     ax1.spines['top'].set_visible(False)
     ax2.spines['top'].set_visible(False)
