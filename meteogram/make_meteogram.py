@@ -44,6 +44,12 @@ def meteogram(place=constants.DEFAULT_PLACE,
     format_axes(ax1, ax2)
     add_weather_symbols(data, ax=ax1, symbol_interval=symbol_interval)
     fig.tight_layout(pad=0.2)
+
+    import datetime as dt
+    s = "Updated " + dt.datetime.now().strftime("%H:%M")
+    height = ax1.get_ylim()[1] - ax1.get_ylim()[0]
+    ax1.text(data['from_mpl'][0] - .19, ax1.get_ylim()[0] - 0.2*height, s)
+
     return fig
 
 
@@ -96,7 +102,8 @@ def plot_precipitation(df, ax):
 
 
 def add_weather_symbols(df, ax, symbol_interval=3):
-    y_pos = ax.get_ylim()[1] - .1 * (ax.get_ylim()[1] - ax.get_ylim()[0])
+    plot_height = ax.get_ylim()[1] - ax.get_ylim()[0]
+    y_pos = ax.get_ylim()[1] - .05 * plot_height
     for index, row in df.iterrows():
         if divmod(row['from'].hour, symbol_interval)[1] == 0:
             sym = os.path.join(constants.WEATHER_SYMBOLS_DIR, row['symbol'] + '.png')
