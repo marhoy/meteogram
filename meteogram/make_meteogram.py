@@ -43,6 +43,7 @@ def meteogram(place=constants.DEFAULT_PLACE,
     format_axes(ax1, ax2)
     plot_precipitation(data, ax2)
     add_weather_symbols(data, ax=ax1, symbol_interval=symbol_interval)
+    add_wind_arrows(data, ax=ax1, symbol_interval=symbol_interval)
 
     import datetime as dt
     s = dt.datetime.now().strftime("%H:%M")
@@ -112,6 +113,24 @@ def add_weather_symbols(df, ax, symbol_interval=3):
             ax.add_artist(ab)
 
 
+def add_wind_arrows(df, ax, symbol_interval=3):
+    for index, row in df.iterrows():
+        if divmod(row['from'].hour, symbol_interval)[1] == 0:
+            windspeed_knots = row['wind_speed'] * 3600 / 1852
+            arrow_name_speed = "{:04}".format(round_base(windspeed_knots * 5, base=25))
+            arrow_name_dir = "{:03}".format(round_base(row['wind_dir'], base=5))
+            arrow_name = "vindpil.{}.{}.png".format(arrow_name_speed, arrow_name_dir)
+            if np.floor(windspeed_knots) == 0:
+                arrow_name = 'vindstille.png'
+            symbol = os.path.join(constants.WEATHER_SYMBOLS_DIR, arrow_name)
+            img = matplotlib.image.imread(symbol, format='png')
+            imagebox = OffsetImage(img, zoom=1)
+            x_pos = row['from_mpl']
+            y_pos = row['temp_smoothed']
+            ab = AnnotationBbox(imagebox, (x_pos, y_pos), frameon=False, box_alignment=(0.5, 1))
+            ax.add_artist(ab)
+
+
 def format_axes(ax1, ax2):
     days = matplotlib.dates.DayLocator()
     # noon = matplotlib.dates.HourLocator(byhour=range(12, 24, 12))
@@ -151,6 +170,10 @@ def format_axes(ax1, ax2):
 
     ax1.set_ylabel('Temperatur [℃]')
     ax2.set_ylabel('Nedbør [mm/h]')
+
+
+def round_base(x, base=5):
+    return int(base * np.floor(x/base))
 
 
 def _get_ax_size_pixels(ax):
