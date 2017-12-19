@@ -17,19 +17,27 @@ from . import constants
 from . import get_weather_data
 
 
-def meteogram(place=constants.DEFAULT_PLACE, hours=constants.DEFAULT_HOURS,
-              symbol_interval=constants.DEFAULT_SYMBOL_INTERVAL, locale=constants.DEFAULT_LOCALE):
+def meteogram(place=constants.DEFAULT_PLACE,
+              hours=constants.DEFAULT_HOURS,
+              symbol_interval=constants.DEFAULT_SYMBOL_INTERVAL,
+              locale=constants.DEFAULT_LOCALE,
+              bgcolor=constants.DEFAULT_BGCOLOR,
+              size_x=constants.DEFAULT_SIZE_H,
+              size_y=constants.DEFAULT_SIZE_V):
+
     python_locale.setlocale(python_locale.LC_ALL, locale)
 
     data = get_weather_data.get_hourly_forecast(place=place)
     data = data[:hours]
 
-    fig_size = (constants.DEFAULT_SIZE_H / constants.DEFAULT_DPI,
-                constants.DEFAULT_SIZE_V / constants.DEFAULT_DPI)
+    fig_size = (size_x / constants.DEFAULT_DPI,
+                size_y / constants.DEFAULT_DPI)
     fig = Figure(figsize=fig_size, dpi=constants.DEFAULT_DPI)
     FigureCanvas(fig)
     ax1 = fig.add_subplot(111)
     ax2 = ax1.twinx()
+    fig.set_facecolor(bgcolor)
+    ax1.set_facecolor(bgcolor)
 
     plot_temp(data, ax1)
     plot_precipitation(data, ax2)
@@ -131,3 +139,4 @@ def format_axes(ax1, ax2):
 
     ax1.set_ylabel('Temperatur [℃]')
     ax2.set_ylabel('Nedbør [mm/h]')
+

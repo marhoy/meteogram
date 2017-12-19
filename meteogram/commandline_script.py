@@ -18,7 +18,7 @@ def main():
     fig = meteogram.meteogram(place=arguments.place, hours=arguments.hours,
                               symbol_interval=arguments.symbol_interval,
                               locale=arguments.locale)
-    fig.savefig(arguments.output_file)
+    fig.savefig(arguments.output_file, facecolor=meteogram.DEFAULT_BGCOLOR)
 
 
 if __name__ == '__main__':
