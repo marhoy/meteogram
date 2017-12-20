@@ -1,9 +1,14 @@
 import argparse
 
 import meteogram
+import yaml
 
 
 def main():
+
+    with open("config.yaml", 'r') as yamlfile:
+        cfg = yaml.load(yamlfile)
+
     parser = argparse.ArgumentParser(
         description='Create a meteogram for a given location.')
     parser.add_argument('-p', '--place', default=meteogram.DEFAULT_PLACE,

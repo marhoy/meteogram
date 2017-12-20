@@ -156,13 +156,13 @@ def format_axes(ax1, ax2):
     if (ax1.get_ylim()[0] < 0) & (ax1.get_ylim()[1] > 0):
         ax1.axhline(0, color='black', linestyle=':', alpha=0.7)
 
-    ax1.figure.tight_layout(pad=0.2)
-
     ax1.spines['top'].set_visible(False)
     ax2.spines['top'].set_visible(False)
 
     ax1.set_ylabel('Temperatur [℃]')
     ax2.set_ylabel('Nedbør [mm/h]')
+
+    ax1.figure.tight_layout(pad=0.2)
 
 
 def round_base(x, base=5):

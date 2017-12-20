@@ -1,0 +1,15 @@
+
+locations:
+  - place: Norway/Oslo/Oslo/Godlia
+    hours: 4
+
+default:
+  hours: 18
+  symbol_interval: 3
+  locale: en_US.UTF-8
+
+  size_h: 392
+  size_v: 234
+  dpi: 100
+
+  bgcolor: (.95, .95, .95)
