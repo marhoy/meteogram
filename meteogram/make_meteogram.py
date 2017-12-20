@@ -117,18 +117,11 @@ def add_wind_arrows(df, ax, symbol_interval=3):
     for index, row in df.iterrows():
         if divmod(row['from'].hour, symbol_interval)[1] == 0:
             windspeed_knots = row['wind_speed'] * 3600 / 1852
-            arrow_name_speed = "{:04}".format(round_base(windspeed_knots * 5, base=25))
-            arrow_name_dir = "{:03}".format(round_base(row['wind_dir'], base=5))
-            arrow_name = "vindpil.{}.{}.png".format(arrow_name_speed, arrow_name_dir)
-            if np.floor(windspeed_knots) == 0:
-                arrow_name = 'vindstille.png'
-            symbol = os.path.join(constants.WEATHER_SYMBOLS_DIR, arrow_name)
-            img = matplotlib.image.imread(symbol, format='png')
-            imagebox = OffsetImage(img, zoom=1)
+            windspeed_x = windspeed_knots * np.cos((row['wind_dir'] - 180) / 180 * np.pi)
+            windspeed_y = windspeed_knots * np.sin((row['wind_dir'] - 180) / 180 * np.pi)
             x_pos = row['from_mpl']
-            y_pos = row['temp_smoothed']
-            ab = AnnotationBbox(imagebox, (x_pos, y_pos), frameon=False, box_alignment=(0.5, 1))
-            ax.add_artist(ab)
+            y_pos = ax.get_ylim()[0] + _pixel_to_units(20, 'v', ax)
+            ax.barbs(x_pos, y_pos, windspeed_x, windspeed_y, length=6, pivot='middle')
 
 
 def format_axes(ax1, ax2):
