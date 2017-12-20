@@ -117,8 +117,8 @@ def add_wind_arrows(df, ax, symbol_interval=3):
     for index, row in df.iterrows():
         if divmod(row['from'].hour, symbol_interval)[1] == 0:
             windspeed_knots = row['wind_speed'] * 3600 / 1852
-            windspeed_x = windspeed_knots * np.cos((row['wind_dir'] - 180) / 180 * np.pi)
-            windspeed_y = windspeed_knots * np.sin((row['wind_dir'] - 180) / 180 * np.pi)
+            windspeed_x = windspeed_knots * np.sin((row['wind_dir'] - 180) / 180 * np.pi)
+            windspeed_y = windspeed_knots * np.cos((row['wind_dir'] - 180) / 180 * np.pi)
             x_pos = row['from_mpl']
             y_pos = ax.get_ylim()[0] + _pixel_to_units(20, 'v', ax)
             ax.barbs(x_pos, y_pos, windspeed_x, windspeed_y, length=6, pivot='middle')
