@@ -6,8 +6,8 @@ import yaml
 
 def main():
 
-    with open("config.yaml", 'r') as yamlfile:
-        cfg = yaml.load(yamlfile)
+    # with open("config.yaml", 'r') as yamlfile:
+    #     cfg = yaml.load(yamlfile)
 
     parser = argparse.ArgumentParser(
         description='Create a meteogram for a given location.')
