@@ -159,8 +159,8 @@ def format_axes(ax1, ax2):
     ax1.spines['top'].set_visible(False)
     ax2.spines['top'].set_visible(False)
 
-    ax1.set_ylabel('Temperatur [℃]')
-    ax2.set_ylabel('Nedbør [mm/h]')
+    # ax1.set_ylabel('Temperatur [℃]')
+    # ax2.set_ylabel('Nedbør [mm/h]')
 
     ax1.figure.tight_layout(pad=0.2)
 
