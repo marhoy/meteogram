@@ -45,10 +45,10 @@ def meteogram(place=constants.DEFAULT_PLACE,
     add_weather_symbols(data, ax=ax1, symbol_interval=symbol_interval)
     add_wind_arrows(data, ax=ax1, symbol_interval=symbol_interval)
 
-    import datetime as dt
-    s = dt.datetime.now().strftime("%H:%M")
-    fig.text(0, 0, s, va='bottom', ha='left')
-
+    # import datetime as dt
+    # s = dt.datetime.now().strftime("%H:%M")
+    # fig.text(0, 0, s, va='bottom', ha='left')
+    #
     return fig
 
 
