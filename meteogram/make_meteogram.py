@@ -64,8 +64,8 @@ def plot_temp(df, ax):
 
     # Create a colormap for red, green and blue and a norm to color
     # f < -0.5 blue, f > 0.5 red
-    cmap = ListedColormap(['b', 'r'])
-    norm = BoundaryNorm([0], cmap.N)
+    cmap = ListedColormap(['b', [1, 0, 1], 'r'])
+    norm = BoundaryNorm([-1e3, -.1, .1, 1e3], cmap.N)
 
     # Create a set of line segments so that we can color them individually
     # This creates the points as a N x 1 x 2 array so that we can stack points
