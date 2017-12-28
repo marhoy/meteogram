@@ -10,7 +10,7 @@ setup(
     author_email='martin.hoy@pvv.ntnu.no',
     description='Create meteogram based on data from yr.no',
     install_requires=[
-        'matplotlib', 'numpy', 'scipy', 'pandas', 'requests', 'beautifulsoup4', 'flask'
+        'matplotlib', 'numpy', 'scipy', 'pandas', 'requests', 'beautifulsoup4', 'Flask'
     ],
     package_data={'meteogram': ['weather_symbols/*.png']},
 
