@@ -24,7 +24,6 @@ def meteogram(place=constants.DEFAULT_PLACE,
               bgcolor=constants.DEFAULT_BGCOLOR,
               size_x=constants.DEFAULT_SIZE_H,
               size_y=constants.DEFAULT_SIZE_V):
-
     python_locale.setlocale(python_locale.LC_ALL, locale)
 
     data = get_weather_data.get_hourly_forecast(place=place)
@@ -45,10 +44,6 @@ def meteogram(place=constants.DEFAULT_PLACE,
     add_weather_symbols(data, ax=ax1, symbol_interval=symbol_interval)
     add_wind_arrows(data, ax=ax1, symbol_interval=symbol_interval)
 
-    # import datetime as dt
-    # s = dt.datetime.now().strftime("%H:%M")
-    # fig.text(0, 0, s, va='bottom', ha='left')
-    #
     return fig
 
 
@@ -64,8 +59,8 @@ def plot_temp(df, ax):
 
     # Create a colormap for red, green and blue and a norm to color
     # f < -0.5 blue, f > 0.5 red
-    cmap = ListedColormap(['b', [1, 0, 1], 'r'])
-    norm = BoundaryNorm([-1e3, -.1, .1, 1e3], cmap.N)
+    cmap = ListedColormap(['#007CB2', '#7B3C7B', '#BC1616'])
+    norm = BoundaryNorm([-1e3, -.5, .5, 1e3], cmap.N)
 
     # Create a set of line segments so that we can color them individually
     # This creates the points as a N x 1 x 2 array so that we can stack points
@@ -166,7 +161,7 @@ def format_axes(ax1, ax2):
 
 
 def round_base(x, base=5):
-    return int(base * np.floor(x/base))
+    return int(base * np.floor(x / base))
 
 
 def _get_ax_size_pixels(ax):
