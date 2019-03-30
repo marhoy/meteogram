@@ -1,0 +1,13 @@
+version: '3'
+
+services:
+
+  rutertider:
+    image: marhoy/meteogram
+    build:
+      dockerfile: Dockerfile
+      context: .
+    container_name: meteogram
+    ports:
+      - 5001:5000
+    restart: always
