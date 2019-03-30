@@ -50,8 +50,8 @@ def get_hourly_forecast(place=constants.DEFAULT_PLACE):
     df['pressure'] = df['pressure'].astype(float)
 
     # Create new columns with dates that are Matplotlib-friendly
-    df['from_mpl'] = matplotlib.dates.date2num(df['from'])  # .astype(datetime.datetime))
-    df['to_mpl'] = matplotlib.dates.date2num(df['to'])  # .astype(datetime.datetime))
+    df['from_mpl'] = matplotlib.dates.date2num(df['from'].astype(datetime.datetime))
+    df['to_mpl'] = matplotlib.dates.date2num(df['to'].astype(datetime.datetime))
     return df
 
 
