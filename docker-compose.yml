@@ -2,10 +2,10 @@ version: '3'
 
 services:
 
-  rutertider:
+  meteogram:
     image: marhoy/meteogram
     build:
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile-armhf
       context: .
     container_name: meteogram
     ports:

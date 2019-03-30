@@ -7,7 +7,7 @@ import meteogram
 app = flask.Flask(__name__)
 
 
-@app.route('/meteogram', methods=['POST', 'GET'])
+@app.route('/', methods=['POST', 'GET'])
 def create_meteogram():
     place = flask.request.args.get('place', meteogram.DEFAULT_PLACE)
     hours = int(flask.request.args.get('hours', meteogram.DEFAULT_HOURS))
