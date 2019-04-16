@@ -1,0 +1,18 @@
+FROM balenalib/%%BALENA_MACHINE_NAME%%
+
+# Install some packages as root
+RUN install_packages python3-pandas python3-matplotlib python3-numpy python3-scipy python3-requests python3-bs4 python3-lxml python3-flask gunicorn3
+
+# Run everything as a non-privileged user
+ENV USERNAME flask
+RUN useradd -m $USERNAME
+USER $USERNAME
+
+# Set home directory as workdir
+WORKDIR /home/$USERNAME
+
+COPY gunicorn_config.py flask_server.py ./
+COPY meteogram meteogram
+
+# CMD ["/bin/bash"]
+CMD ["gunicorn3", "-c", "gunicorn_config.py", "flask_server:app"]
