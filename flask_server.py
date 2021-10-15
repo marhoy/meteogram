@@ -3,18 +3,23 @@ import io
 import flask
 
 import meteogram
+from meteogram.schemas import Location
 
 app = flask.Flask(__name__)
 
 
 @app.route("/", methods=["POST", "GET"])
 def create_meteogram():
-    location = flask.request.args.get("location", meteogram.DEFAULT_LOCATION)
+    lat = flask.request.args.get("lat")
+    lon = flask.request.args.get("lon")
+    altitude = flask.request.args.get("altitude", None)
     hours = int(flask.request.args.get("hours", meteogram.DEFAULT_HOURS))
     symbol_interval = int(
         flask.request.args.get("symbol_interval", meteogram.DEFAULT_SYMBOL_INTERVAL)
     )
     locale = flask.request.args.get("locale", meteogram.DEFAULT_LOCALE)
+
+    location = Location(altitude=altitude, lat=lat, lon=lon)
 
     fig = meteogram.meteogram(
         location=location, hours=hours, symbol_interval=symbol_interval, locale=locale
