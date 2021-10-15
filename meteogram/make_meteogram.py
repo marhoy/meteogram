@@ -18,7 +18,7 @@ from . import get_weather_data
 
 
 def meteogram(
-    place=constants.DEFAULT_PLACE,
+    location=constants.DEFAULT_LOCATION,
     hours=constants.DEFAULT_HOURS,
     symbol_interval=constants.DEFAULT_SYMBOL_INTERVAL,
     locale=constants.DEFAULT_LOCALE,
@@ -28,7 +28,7 @@ def meteogram(
 ):
     python_locale.setlocale(python_locale.LC_ALL, locale)
 
-    data = get_weather_data.get_hourly_forecast(place=place)
+    data = get_weather_data.get_hourly_forecast(location=location)
     data = data[:hours]
 
     fig_size = (size_x / constants.DEFAULT_DPI, size_y / constants.DEFAULT_DPI)
@@ -143,7 +143,7 @@ def format_axes(ax1, ax2):
     # ax1.set_yticks(range(-40, 50, 1), minor=False)
     # ax1.set_yticks(range(-40, 50, 1), minor=True)
     ax1.autoscale()
-    ax1.set_ylim(bottom=np.floor(ax1.get_ylim()[0]), top=np.ceil(ax1.get_ylim()[1]))
+    ax1.set_ylim(bottom=np.floor(ax1.get_ylim()[0]), top=np.ceil(ax1.get_ylim()[1] + 1))
     ax1.yaxis.set_major_locator(MaxNLocator(integer=True))
 
     ax2.set_ylim(bottom=0, top=2)

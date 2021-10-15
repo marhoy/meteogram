@@ -1,77 +1,74 @@
-import datetime
-
 import matplotlib.dates
 import pandas as pd
 import requests
 from bs4 import BeautifulSoup
 
 from . import constants
+from .schemas import Location
 
 
-def _create_url(place=constants.DEFAULT_PLACE):
-    url = "https://www.yr.no/place/" + place
-    return url
-
-
-def get_hourly_forecast(place=constants.DEFAULT_PLACE):
-    # url = _create_url(place) + '/varsel_time_for_time.xml'
-    # response = requests.get(url)
-    url = "https://api.met.no/weatherapi/locationforecast/2.0/classic.xml?altitude=132&lat=59.909068&lon=10.8392416"
+def get_hourly_forecast(
+    location: Location = constants.DEFAULT_LOCATION,
+) -> pd.DataFrame:
+    """Get data from the Yr API and return a DataFrame."""
+    url = "https://api.met.no/weatherapi/locationforecast/2.0/complete"
     headers = {
-        "Accept": "application/xml",
         "User-Agent": "https://github.com/marhoy/meteogram",
     }
-    response = requests.get(url, headers=headers)
-    soup = BeautifulSoup(response.text, "lxml")
+    response = requests.get(url, headers=headers, params=location.dict())
+    data = response.json()
 
     rows = []
-    for time in soup.find_all("time"):
-        time_from = pd.to_datetime(time["from"])
-        time_to = pd.to_datetime(time["to"])
+    for time in data["properties"]["timeseries"]:
 
-        if time_from == time_to:
-            row = dict()
-            row["temp"] = float(time.temperature["value"])
-            row["wind_dir"] = float(time.winddirection["deg"])
-            row["wind_speed"] = float(time.windspeed["mps"])
-            row["pressure"] = float(time.pressure["value"])
-        elif time_to - time_from == pd.Timedelta("1 hour"):
-            row["from"] = time_from
-            row["to"] = time_to
-            row["symbol"] = time.symbol["code"]
-            row["precip"] = float(time.precipitation["value"])
-            row["precip_min"] = float(time.precipitation["minvalue"])
-            row["precip_max"] = float(time.precipitation["maxvalue"])
+        if not "next_1_hours" in time["data"].keys():
+            # This data point does not have information about next 1 hour
+            continue
 
-            rows.append(row)
+        instant_details = time["data"]["instant"]["details"]
+        next_1_hour_details = time["data"]["next_1_hours"]
+
+        row = dict()
+        row["from"] = (
+            pd.to_datetime(time["time"]).tz_convert("Europe/Oslo").tz_localize(tz=None)
+        )
+        row["temp"] = float(instant_details["air_temperature"])
+        row["wind_dir"] = float(instant_details["wind_from_direction"])
+        row["wind_speed"] = float(instant_details["wind_speed"])
+        row["pressure"] = float(instant_details["air_pressure_at_sea_level"])
+
+        row["symbol"] = next_1_hour_details["summary"]["symbol_code"]
+        row["precip"] = float(next_1_hour_details["details"]["precipitation_amount"])
+        row["precip_min"] = float(
+            next_1_hour_details["details"]["precipitation_amount_min"]
+        )
+        row["precip_max"] = float(
+            next_1_hour_details["details"]["precipitation_amount_max"]
+        )
+
+        rows.append(row)
 
     df = pd.DataFrame(rows)
 
-    # Change the data type of the different columns
-    # df["from"] = pd.to_datetime(df["from"])
-    # df["to"] = pd.to_datetime(df["to"])
-
-    # Create new columns with dates that are Matplotlib-friendly
-    df["from_mpl"] = matplotlib.dates.date2num(
-        df["from"]
-    )  # .astype(datetime.datetime))
-    df["to_mpl"] = matplotlib.dates.date2num(df["to"])  # .astype(datetime.datetime))
-    return df
-
-
-def get_precip_now(place=constants.DEFAULT_PLACE):
-    url = _create_url(place) + "/varsel_nu.xml"
-    response = requests.get(url)
-    soup = BeautifulSoup(response.text, "lxml")
-
-    column_names = ["time", "precip"]
-    df = pd.DataFrame(columns=column_names)
-
-    for time in soup.forecast.find_all("time"):
-        row = pd.DataFrame(
-            [[time["from"], time.precipitation["value"]]], columns=column_names
-        )
-        df = df.append(row)
-    df = df.reset_index(drop=True)
+    # Create a new column with a Matplotlib-friendly datetime
+    df["from_mpl"] = matplotlib.dates.date2num(df["from"])
 
     return df
+
+
+# def get_precip_now(place=constants.DEFAULT_PLACE):
+#     url = _create_url(place) + "/varsel_nu.xml"
+#     response = requests.get(url)
+#     soup = BeautifulSoup(response.text, "lxml")
+
+#     column_names = ["time", "precip"]
+#     df = pd.DataFrame(columns=column_names)
+
+#     for time in soup.forecast.find_all("time"):
+#         row = pd.DataFrame(
+#             [[time["from"], time.precipitation["value"]]], columns=column_names
+#         )
+#         df = df.append(row)
+#     df = df.reset_index(drop=True)
+
+#     return df
