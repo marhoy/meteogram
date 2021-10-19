@@ -1,4 +1,20 @@
-FROM python:3.7-slim
+FROM python:3.9-slim-buster
+
+
+# Define some environment variables
+ENV PIP_NO_CACHE_DIR=true \
+    DEBIAN_FRONTEND=noninteractive
+
+# Install dependencies needed to download/install packages
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+    apt-utils \
+    locales
+
+# Add support for different locales
+COPY locale.gen /etc/locale.gen
+RUN /usr/sbin/locale-gen
+
 
 RUN useradd flask
 
@@ -10,7 +26,7 @@ WORKDIR /home/flask
 # RUN venv/bin/pip install -r requirements.txt
 # RUN venv/bin/pip install gunicorn
 
-RUN pip install Flask matplotlib scipy pandas requests beautifulsoup4 lxml
+RUN pip install Flask matplotlib scipy pandas requests beautifulsoup4 lxml pydantic
 RUN pip install gunicorn
 COPY meteogram meteogram
 COPY gunicorn_config.py gunicorn_config.py
@@ -21,5 +37,5 @@ COPY flask_server.py flask_server.py
 # USER flask
 
 EXPOSE 5000
-ENTRYPOINT ["python3", "flask_server.py"]
-# ENTRYPOINT ["gunicorn", "-c", "gunicorn_config.py", "flask_server:app"]
+# ENTRYPOINT ["python3", "flask_server.py"]
+ENTRYPOINT ["gunicorn", "-c", "gunicorn_config.py", "flask_server:app"]

@@ -1,25 +1,31 @@
 from setuptools import setup
 
 setup(
-    name='meteogram',
-    version='1.0',
-    packages=['meteogram'],
-    url='',
-    license='',
-    author='Martin Høy',
-    author_email='martin.hoy@pvv.ntnu.no',
-    description='Create meteogram based on data from yr.no',
+    name="meteogram",
+    version="1.0",
+    packages=["meteogram"],
+    url="",
+    license="",
+    author="Martin Høy",
+    author_email="martin.hoy@pvv.ntnu.no",
+    description="Create meteogram based on data from yr.no",
     install_requires=[
-        'matplotlib', 'numpy', 'scipy', 'pandas', 'requests', 'beautifulsoup4', 'Flask'
+        "matplotlib",
+        "numpy",
+        "scipy",
+        "pandas",
+        "requests",
+        "beautifulsoup4",
+        "pydantic",
+        "Flask",
     ],
-    package_data={'meteogram': ['weather_symbols/*.png']},
-
+    package_data={"meteogram": ["weather_symbols/*.png"]},
     entry_points={
-        'console_scripts': [
-            'meteogram-server=meteogram.flask_server:main',
-            'meteogram-tofile=meteogram.commandline_script:main'
+        "console_scripts": [
+            "meteogram-server=meteogram.flask_server:main",
+            "meteogram-tofile=meteogram.commandline_script:main",
         ]
-    }
+    },
 )
 
 #
