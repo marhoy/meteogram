@@ -17,7 +17,7 @@ class Config(BaseConfig):
     HOURS: int = 26
     SYMBOL_INTERVAL: int = 3
 
-    DPI: int = 90
+    DPI: int = 72
 
     # Cell size is 114 x 114, spacing is 5
     HORIZONTAL_SIZE: int = 114 * 3 + 5 * 2

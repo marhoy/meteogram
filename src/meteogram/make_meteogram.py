@@ -1,6 +1,7 @@
 import importlib.resources
 import locale as python_locale
 
+import matplotlib
 import matplotlib.dates
 import matplotlib.image
 import numpy as np
@@ -44,6 +45,8 @@ def meteogram(
         python_locale.setlocale(python_locale.LC_ALL, locale)
     except python_locale.Error:
         pass
+
+    matplotlib.rc("font", size=14.5)
 
     fig_size = (size_x / config.DPI, size_y / config.DPI)
     fig = Figure(figsize=fig_size, dpi=config.DPI)
@@ -122,7 +125,7 @@ def add_weather_symbols(df, ax, symbol_interval=3):
                 "meteogram.weather_symbols.png", f'{row["symbol"]}.png'
             ) as file:
                 img = matplotlib.image.imread(file, format="png")
-            imagebox = OffsetImage(img, zoom=0.15)
+            imagebox = OffsetImage(img, zoom=0.20)
             x_pos = row["from_mpl"]
             y_pos = row["temp_smoothed"] + _pixel_to_units(5, "v", ax)
             ab = AnnotationBbox(
@@ -143,7 +146,7 @@ def add_wind_arrows(df, ax, symbol_interval=3):
             )
             x_pos = row["from_mpl"]
             y_pos = ax.get_ylim()[0] + _pixel_to_units(20, "v", ax)
-            ax.barbs(x_pos, y_pos, windspeed_x, windspeed_y, length=7, pivot="middle")
+            ax.barbs(x_pos, y_pos, windspeed_x, windspeed_y, length=8, pivot="middle")
 
 
 def format_axes(ax1, ax2):
