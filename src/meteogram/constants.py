@@ -14,7 +14,7 @@ class Config(BaseConfig):
     TIMEZONE: str = "Europe/Oslo"
     LOCALE: str = "nb_NO.UTF-8"
 
-    HOURS: int = 24
+    HOURS: int = 26
     SYMBOL_INTERVAL: int = 3
 
     DPI: int = 90

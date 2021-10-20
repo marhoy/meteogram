@@ -40,7 +40,10 @@ def meteogram(
     if size_y is None:
         size_y = config.VERTICAL_SIZE
 
-    python_locale.setlocale(python_locale.LC_ALL, locale)
+    try:
+        python_locale.setlocale(python_locale.LC_ALL, locale)
+    except python_locale.Error:
+        pass
 
     fig_size = (size_x / config.DPI, size_y / config.DPI)
     fig = Figure(figsize=fig_size, dpi=config.DPI)
@@ -140,7 +143,7 @@ def add_wind_arrows(df, ax, symbol_interval=3):
             )
             x_pos = row["from_mpl"]
             y_pos = ax.get_ylim()[0] + _pixel_to_units(20, "v", ax)
-            ax.barbs(x_pos, y_pos, windspeed_x, windspeed_y, length=6, pivot="middle")
+            ax.barbs(x_pos, y_pos, windspeed_x, windspeed_y, length=7, pivot="middle")
 
 
 def format_axes(ax1, ax2):
@@ -154,7 +157,7 @@ def format_axes(ax1, ax2):
     # ax1.set_yticks(range(-40, 50, 1), minor=False)
     # ax1.set_yticks(range(-40, 50, 1), minor=True)
     ax1.autoscale()
-    ax1.set_ylim(bottom=np.floor(ax1.get_ylim()[0]), top=np.ceil(ax1.get_ylim()[1] + 1))
+    ax1.set_ylim(bottom=np.floor(ax1.get_ylim()[0]), top=np.ceil(ax1.get_ylim()[1] + 0))
     ax1.yaxis.set_major_locator(MaxNLocator(integer=True))
 
     ax2.set_ylim(bottom=0, top=2)
