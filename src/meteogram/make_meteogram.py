@@ -1,3 +1,4 @@
+import datetime
 import importlib.resources
 import locale as python_locale
 
@@ -20,24 +21,24 @@ from meteogram import config
 
 def meteogram(
     data: pd.DataFrame,
+    hours: int = None,
     symbol_interval: int = None,
     locale: str = None,
     bgcolor=None,
     size_x: int = None,
     size_y: int = None,
 ):
+
+    if hours is None:
+        hours = config.HOURS
     if symbol_interval is None:
         symbol_interval = config.SYMBOL_INTERVAL
-
     if locale is None:
         locale = config.LOCALE
-
     if bgcolor is None:
         bgcolor = config.BGCOLOR
-
     if size_x is None:
         size_x = config.HORIZONTAL_SIZE
-
     if size_y is None:
         size_y = config.VERTICAL_SIZE
 
@@ -45,6 +46,12 @@ def meteogram(
         python_locale.setlocale(python_locale.LC_ALL, locale)
     except python_locale.Error:
         pass
+
+    # Use only the first n elements, starting from now
+    now = datetime.datetime.now()
+    first_datapoint = (data["from"] > now).argmax() - 1
+    last_datapoint = first_datapoint + hours
+    data = data.iloc[first_datapoint:last_datapoint].copy()
 
     matplotlib.rc("font", size=14.5)
 
@@ -184,8 +191,8 @@ def format_axes(ax1, ax2):
     ax1.spines["top"].set_visible(False)
     ax2.spines["top"].set_visible(False)
 
-    # ax1.set_ylabel('Temperatur [℃]')
-    # ax2.set_ylabel('Nedbør [mm/h]')
+    # ax1.set_ylabel("Temperatur [°C]")
+    # ax2.set_ylabel("Nedbør [mm/h]")
 
     ax1.figure.tight_layout(pad=0.2)
 
