@@ -1,0 +1,30 @@
+[tool.poetry]
+name = "meteogram"
+version = "0.1.0"
+description = "Create meteogram based on data from yr.no"
+authors = ["Martin Høy <martin@hoy.priv.no>"]
+
+[tool.poetry.dependencies]
+python = "3.9"
+pandas = "^1.3.4"
+matplotlib = "^3.4.3"
+requests = "^2.26.0"
+pydantic = "^1.8.2"
+fastapi = "^0.70.0"
+uvicorn = "^0.15.0"
+python-dotenv = "^0.19.1"
+scipy = "^1.7.1"
+
+[tool.poetry.dev-dependencies]
+black = "^21.9b0"
+flake8 = "^4.0.1"
+mypy = "^0.910"
+pydocstyle = "^6.1.1"
+pre-commit = "^2.15.0"
+pytest = "^6.2.5"
+ipykernel = "^6.4.1"
+types-requests = "^2.25.11"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

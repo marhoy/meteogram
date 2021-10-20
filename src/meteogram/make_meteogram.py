@@ -8,13 +8,12 @@ import scipy.interpolate
 import scipy.signal
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.collections import LineCollection
-from matplotlib.colors import ListedColormap, BoundaryNorm
+from matplotlib.colors import BoundaryNorm, ListedColormap
 from matplotlib.figure import Figure
-from matplotlib.offsetbox import OffsetImage, AnnotationBbox
+from matplotlib.offsetbox import AnnotationBbox, OffsetImage
 from matplotlib.ticker import MaxNLocator
 
-from . import constants
-from . import get_weather_data
+from . import constants, get_weather_data
 
 
 def meteogram(
