@@ -1,9 +1,10 @@
+import importlib.resources
 import locale as python_locale
-import os
 
 import matplotlib.dates
 import matplotlib.image
 import numpy as np
+import pandas as pd
 import scipy.interpolate
 import scipy.signal
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
@@ -13,25 +14,36 @@ from matplotlib.figure import Figure
 from matplotlib.offsetbox import AnnotationBbox, OffsetImage
 from matplotlib.ticker import MaxNLocator
 
-from . import constants, get_weather_data
+from meteogram import config
 
 
 def meteogram(
-    location=constants.DEFAULT_LOCATION,
-    hours=constants.DEFAULT_HOURS,
-    symbol_interval=constants.DEFAULT_SYMBOL_INTERVAL,
-    locale=constants.DEFAULT_LOCALE,
-    bgcolor=constants.DEFAULT_BGCOLOR,
-    size_x=constants.DEFAULT_SIZE_H,
-    size_y=constants.DEFAULT_SIZE_V,
+    data: pd.DataFrame,
+    symbol_interval: int = None,
+    locale: str = None,
+    bgcolor=None,
+    size_x: int = None,
+    size_y: int = None,
 ):
+    if symbol_interval is None:
+        symbol_interval = config.SYMBOL_INTERVAL
+
+    if locale is None:
+        locale = config.LOCALE
+
+    if bgcolor is None:
+        bgcolor = config.BGCOLOR
+
+    if size_x is None:
+        size_x = config.HORIZONTAL_SIZE
+
+    if size_y is None:
+        size_y = config.VERTICAL_SIZE
+
     python_locale.setlocale(python_locale.LC_ALL, locale)
 
-    data = get_weather_data.get_hourly_forecast(location=location)
-    data = data[:hours]
-
-    fig_size = (size_x / constants.DEFAULT_DPI, size_y / constants.DEFAULT_DPI)
-    fig = Figure(figsize=fig_size, dpi=constants.DEFAULT_DPI)
+    fig_size = (size_x / config.DPI, size_y / config.DPI)
+    fig = Figure(figsize=fig_size, dpi=config.DPI)
     FigureCanvas(fig)
     ax1 = fig.add_subplot(111)
     ax2 = ax1.twinx()
@@ -103,10 +115,10 @@ def plot_precipitation(df, ax):
 def add_weather_symbols(df, ax, symbol_interval=3):
     for index, row in df.iterrows():
         if divmod(row["from"].hour, symbol_interval)[1] == 0:
-            sym = os.path.join(
-                constants.WEATHER_SYMBOLS_DIR, "png", row["symbol"] + ".png"
-            )
-            img = matplotlib.image.imread(sym, format="png")
+            with importlib.resources.path(
+                "meteogram.weather_symbols.png", f'{row["symbol"]}.png'
+            ) as file:
+                img = matplotlib.image.imread(file, format="png")
             imagebox = OffsetImage(img, zoom=0.15)
             x_pos = row["from_mpl"]
             y_pos = row["temp_smoothed"] + _pixel_to_units(5, "v", ax)

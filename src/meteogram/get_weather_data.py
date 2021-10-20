@@ -47,10 +47,10 @@ def get_hourly_forecast(location: Optional[Location] = None) -> pd.DataFrame:
         row["symbol"] = next_1_hour_details["summary"]["symbol_code"]
         row["precip"] = float(next_1_hour_details["details"]["precipitation_amount"])
         row["precip_min"] = float(
-            next_1_hour_details["details"]["precipitation_amount_min"]
+            next_1_hour_details["details"].get("precipitation_amount_min", 0)
         )
         row["precip_max"] = float(
-            next_1_hour_details["details"]["precipitation_amount_max"]
+            next_1_hour_details["details"].get("precipitation_amount_max", 0)
         )
 
         rows.append(row)
