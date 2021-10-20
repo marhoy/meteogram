@@ -49,7 +49,7 @@ def meteogram(
 
     # Use only the first n elements, starting from now
     now = datetime.datetime.now()
-    first_datapoint = (data["from"] > now).argmax() - 1
+    first_datapoint = max(0, (data["from"] > now).argmax() - 1)
     last_datapoint = first_datapoint + hours
     data = data.iloc[first_datapoint:last_datapoint].copy()
 
@@ -134,7 +134,7 @@ def add_weather_symbols(df, ax, symbol_interval=3):
                 img = matplotlib.image.imread(file, format="png")
             imagebox = OffsetImage(img, zoom=0.20)
             x_pos = row["from_mpl"]
-            y_pos = row["temp_smoothed"] + _pixel_to_units(5, "v", ax)
+            y_pos = row["temp_smoothed"] + _pixel_to_units(0, "v", ax)
             ab = AnnotationBbox(
                 imagebox, (x_pos, y_pos), frameon=False, box_alignment=(0.5, 0)
             )
@@ -153,7 +153,7 @@ def add_wind_arrows(df, ax, symbol_interval=3):
             )
             x_pos = row["from_mpl"]
             y_pos = ax.get_ylim()[0] + _pixel_to_units(20, "v", ax)
-            ax.barbs(x_pos, y_pos, windspeed_x, windspeed_y, length=8, pivot="middle")
+            ax.barbs(x_pos, y_pos, windspeed_x, windspeed_y, length=7, pivot="middle")
 
 
 def format_axes(ax1, ax2):

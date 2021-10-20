@@ -1,7 +1,5 @@
 """Get weather data from Yr API."""
 
-from typing import Optional
-
 import matplotlib.dates
 import pandas as pd
 import requests
@@ -10,11 +8,8 @@ from meteogram import config
 from meteogram.schemas import Location
 
 
-def get_hourly_forecast(location: Optional[Location] = None) -> pd.DataFrame:
+def get_hourly_forecast(location: Location) -> pd.DataFrame:
     """Get data from the Yr API and return a DataFrame."""
-    if location is None:
-        location = config.LOCATION
-
     url = "https://api.met.no/weatherapi/locationforecast/2.0/complete"
     headers = {
         "User-Agent": "https://github.com/marhoy/meteogram",
