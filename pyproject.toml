@@ -14,6 +14,8 @@ fastapi = "^0.70.0"
 uvicorn = "^0.15.0"
 python-dotenv = "^0.19.1"
 scipy = "^1.7.1"
+requests-cache = "^0.8.1"
+loguru = "^0.5.3"
 
 [tool.poetry.dev-dependencies]
 black = "^21.9b0"

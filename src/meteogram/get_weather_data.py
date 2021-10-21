@@ -2,21 +2,44 @@
 
 import matplotlib.dates
 import pandas as pd
-import requests
+import requests_cache
+from loguru import logger
 
 from meteogram import config
 from meteogram.schemas import Location
 
+# Create a session-object with caching determined by the response headers
+session = requests_cache.CachedSession("yr_cache", cache_control=True)
+
 
 def get_hourly_forecast(location: Location) -> pd.DataFrame:
-    """Get data from the Yr API and return a DataFrame."""
+    """Get hourly forecast data from the Yr API as a DataFrame.
+
+    Args:
+        location: The location (lat, lon, and optionally altitude)
+
+    Returns:
+        pd.Dataframe: Hourly forecast data
+    """
+    # Get data from the YR API. The resulting response will be returned from cache if
+    # the previous response hasn't expired yet.
     url = "https://api.met.no/weatherapi/locationforecast/2.0/complete"
     headers = {
         "User-Agent": "https://github.com/marhoy/meteogram",
     }
-    response = requests.get(url, headers=headers, params=location.dict())
+    response = session.get(url, headers=headers, params=location.dict())
     response.raise_for_status()
     data = response.json()
+
+    # Log info about caching
+    if response.from_cache:  # type: ignore
+        logger.debug(
+            f"Returned a cached response. Expires at {response.expires}"  # type: ignore
+        )
+    else:
+        logger.debug(
+            f"New reponse from api.met.no. Expires at {response.headers['Expires']}"
+        )
 
     rows = []
     for time in data["properties"]["timeseries"]:
