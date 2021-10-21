@@ -1,4 +1,4 @@
-FROM python:3.9-slim-buster
+FROM python:3.9-slim-bullseye
 
 # Define some environment variables
 ENV PIP_NO_CACHE_DIR=true \
