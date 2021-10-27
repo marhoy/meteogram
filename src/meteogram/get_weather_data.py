@@ -1,11 +1,9 @@
 """Get weather data from Yr API."""
 
-import matplotlib.dates
 import pandas as pd
 import requests_cache
 from loguru import logger
 
-from meteogram import config
 from meteogram.schemas import Location
 
 # Create a session-object with caching determined by the response headers
@@ -52,11 +50,7 @@ def get_hourly_forecast(location: Location) -> pd.DataFrame:
         next_1_hour_details = time["data"]["next_1_hours"]
 
         row = dict()
-        row["from"] = (
-            pd.to_datetime(time["time"])
-            .tz_convert(config.TIMEZONE)
-            .tz_localize(tz=None)
-        )
+        row["from"] = pd.to_datetime(time["time"])
         row["temp"] = float(instant_details["air_temperature"])
         row["wind_dir"] = float(instant_details["wind_from_direction"])
         row["wind_speed"] = float(instant_details["wind_speed"])
@@ -74,8 +68,5 @@ def get_hourly_forecast(location: Location) -> pd.DataFrame:
         rows.append(row)
 
     df = pd.DataFrame(rows)
-
-    # Create a new column with a Matplotlib-friendly datetime
-    df["from_mpl"] = matplotlib.dates.date2num(df["from"])
 
     return df

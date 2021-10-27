@@ -1,4 +1,3 @@
-import datetime
 import importlib.resources
 import locale as python_locale
 
@@ -24,10 +23,11 @@ def meteogram(
     hours: int = None,
     symbol_interval: int = None,
     locale: str = None,
+    timezone: str = None,
     bgcolor=None,
     size_x: int = None,
     size_y: int = None,
-):
+) -> Figure:
 
     if hours is None:
         hours = config.HOURS
@@ -35,6 +35,8 @@ def meteogram(
         symbol_interval = config.SYMBOL_INTERVAL
     if locale is None:
         locale = config.LOCALE
+    if timezone is None:
+        timezone = config.TIMEZONE
     if bgcolor is None:
         bgcolor = config.BGCOLOR
     if size_x is None:
@@ -47,14 +49,21 @@ def meteogram(
     except python_locale.Error:
         pass
 
-    # Use only the first n elements, starting from now
-    now = datetime.datetime.now()
-    first_datapoint = max(0, (data["from"] > now).argmax() - 1)
+    # Use only the first n elements. The first element includes the current hour.
+    now_1h = pd.Timestamp.utcnow().floor("1h")
+    first_datapoint = (data["from"] >= now_1h).argmax()
     last_datapoint = first_datapoint + hours
     data = data.iloc[first_datapoint:last_datapoint].copy()
 
+    # Convert the timestamps to naïve, local timezone
+    data["from_local"] = data["from"].dt.tz_convert(timezone).dt.tz_localize(tz=None)
+    # Create a new column with a Matplotlib-friendly datetimes
+    data["from_mpl"] = matplotlib.dates.date2num(data["from_local"])
+
+    # Set overall font size
     matplotlib.rc("font", size=14.5)
 
+    # Create the figure canvas and axes
     fig_size = (size_x / config.DPI, size_y / config.DPI)
     fig = Figure(figsize=fig_size, dpi=config.DPI)
     FigureCanvas(fig)
@@ -63,6 +72,7 @@ def meteogram(
     fig.set_facecolor(bgcolor)
     ax1.set_facecolor(bgcolor)
 
+    # Add things to the axes
     plot_temp(data, ax1)
     format_axes(ax1, ax2)
     plot_precipitation(data, ax2)
@@ -127,14 +137,14 @@ def plot_precipitation(df, ax):
 
 def add_weather_symbols(df, ax, symbol_interval=3):
     for index, row in df.iterrows():
-        if divmod(row["from"].hour, symbol_interval)[1] == 0:
+        if row["from_local"].hour % symbol_interval == 0:
             with importlib.resources.path(
                 "meteogram.weather_symbols.png", f'{row["symbol"]}.png'
             ) as file:
                 img = matplotlib.image.imread(file, format="png")
             imagebox = OffsetImage(img, zoom=0.20)
             x_pos = row["from_mpl"]
-            y_pos = row["temp_smoothed"] + _pixel_to_units(0, "v", ax)
+            y_pos = row["temp_smoothed"] + _pixel_to_units(-10, "v", ax)
             ab = AnnotationBbox(
                 imagebox, (x_pos, y_pos), frameon=False, box_alignment=(0.5, 0)
             )
@@ -143,7 +153,7 @@ def add_weather_symbols(df, ax, symbol_interval=3):
 
 def add_wind_arrows(df, ax, symbol_interval=3):
     for index, row in df.iterrows():
-        if divmod(row["from"].hour, symbol_interval)[1] == 0:
+        if row["from_local"].hour % symbol_interval == 0:
             windspeed_knots = row["wind_speed"] * 3600 / 1852
             windspeed_x = windspeed_knots * np.sin(
                 (row["wind_dir"] - 180) / 180 * np.pi
