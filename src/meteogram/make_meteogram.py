@@ -108,7 +108,7 @@ def plot_temp(df, ax):
     # Have to set the actual values used for colormapping separately.
     lc = LineCollection(segments, cmap=cmap, norm=norm)
     lc.set_array(y_fine_res)
-    lc.set_linewidth(3)
+    lc.set_linewidth(6)
 
     ax.add_collection(lc)
 
@@ -144,7 +144,7 @@ def add_weather_symbols(df, ax, symbol_interval=3):
                 img = matplotlib.image.imread(file, format="png")
             imagebox = OffsetImage(img, zoom=0.20)
             x_pos = row["from_mpl"]
-            y_pos = row["temp_smoothed"] + _pixel_to_units(-10, "v", ax)
+            y_pos = row["temp_smoothed"] + _pixel_to_units(0, "v", ax)
             ab = AnnotationBbox(
                 imagebox, (x_pos, y_pos), frameon=False, box_alignment=(0.5, 0)
             )
