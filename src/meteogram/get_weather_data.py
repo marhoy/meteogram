@@ -32,11 +32,13 @@ def get_hourly_forecast(location: Location) -> pd.DataFrame:
     # Log info about caching
     if response.from_cache:  # type: ignore
         logger.debug(
-            f"Returned a cached response. Expires at {response.expires}"  # type: ignore
+            "Returned a cached response. "
+            f"Expires at {response.expires} GMT"  # type: ignore
         )
     else:
         logger.debug(
-            f"New reponse from api.met.no. Expires at {response.headers['Expires']}"
+            "Retreived new data from api.met.no. "
+            f"Expires at {response.headers['Expires']}"
         )
 
     rows = []
