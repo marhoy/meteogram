@@ -16,7 +16,7 @@ app = FastAPI()
 
 @app.get("/")
 def get_meteogram(lat: float, lon: float, altitude: int = None, hours: int = None):
-
+    """Return a meteogram as a png-image."""
     try:
         location = Location(lat=lat, lon=lon, altitude=altitude)
     except pydantic.ValidationError:
