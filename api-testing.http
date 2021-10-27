@@ -14,4 +14,11 @@ GET http://localhost:8000
     ?lat=59.916948
     &lon=10.728118
     &altitude=32
-User-Agent: rest-client
+
+
+###
+
+GET http://meteogram.hoy.priv.no/
+    ?lat=59.916948
+    &lon=10.728118
+    &altitude=32
