@@ -1,44 +1,78 @@
+import importlib.resources
 import locale as python_locale
-import os
 
+import matplotlib
 import matplotlib.dates
 import matplotlib.image
 import numpy as np
+import pandas as pd
 import scipy.interpolate
 import scipy.signal
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.collections import LineCollection
-from matplotlib.colors import ListedColormap, BoundaryNorm
+from matplotlib.colors import BoundaryNorm, ListedColormap
 from matplotlib.figure import Figure
-from matplotlib.offsetbox import OffsetImage, AnnotationBbox
+from matplotlib.offsetbox import AnnotationBbox, OffsetImage
 from matplotlib.ticker import MaxNLocator
 
-from . import constants
-from . import get_weather_data
+from meteogram import config
 
 
 def meteogram(
-    location=constants.DEFAULT_LOCATION,
-    hours=constants.DEFAULT_HOURS,
-    symbol_interval=constants.DEFAULT_SYMBOL_INTERVAL,
-    locale=constants.DEFAULT_LOCALE,
-    bgcolor=constants.DEFAULT_BGCOLOR,
-    size_x=constants.DEFAULT_SIZE_H,
-    size_y=constants.DEFAULT_SIZE_V,
-):
-    python_locale.setlocale(python_locale.LC_ALL, locale)
+    data: pd.DataFrame,
+    hours: int = None,
+    symbol_interval: int = None,
+    locale: str = None,
+    timezone: str = None,
+    bgcolor=None,
+    size_x: int = None,
+    size_y: int = None,
+) -> Figure:
 
-    data = get_weather_data.get_hourly_forecast(location=location)
-    data = data[:hours]
+    if hours is None:
+        hours = config.HOURS
+    if symbol_interval is None:
+        symbol_interval = config.SYMBOL_INTERVAL
+    if locale is None:
+        locale = config.LOCALE
+    if timezone is None:
+        timezone = config.TIMEZONE
+    if bgcolor is None:
+        bgcolor = config.BGCOLOR
+    if size_x is None:
+        size_x = config.HORIZONTAL_SIZE
+    if size_y is None:
+        size_y = config.VERTICAL_SIZE
 
-    fig_size = (size_x / constants.DEFAULT_DPI, size_y / constants.DEFAULT_DPI)
-    fig = Figure(figsize=fig_size, dpi=constants.DEFAULT_DPI)
+    try:
+        python_locale.setlocale(python_locale.LC_ALL, locale)
+    except python_locale.Error:
+        pass
+
+    # Use only the first n elements. The first element includes the current hour.
+    now_1h = pd.Timestamp.utcnow().floor("1h")
+    first_datapoint = (data["from"] >= now_1h).argmax()
+    last_datapoint = first_datapoint + hours
+    data = data.iloc[first_datapoint:last_datapoint].copy()
+
+    # Convert the timestamps to naïve, local timezone
+    data["from_local"] = data["from"].dt.tz_convert(timezone).dt.tz_localize(tz=None)
+    # Create a new column with a Matplotlib-friendly datetimes
+    data["from_mpl"] = matplotlib.dates.date2num(data["from_local"])
+
+    # Set overall font size
+    matplotlib.rc("font", size=14.5)
+
+    # Create the figure canvas and axes
+    fig_size = (size_x / config.DPI, size_y / config.DPI)
+    fig = Figure(figsize=fig_size, dpi=config.DPI)
     FigureCanvas(fig)
     ax1 = fig.add_subplot(111)
     ax2 = ax1.twinx()
     fig.set_facecolor(bgcolor)
     ax1.set_facecolor(bgcolor)
 
+    # Add things to the axes
     plot_temp(data, ax1)
     format_axes(ax1, ax2)
     plot_precipitation(data, ax2)
@@ -74,7 +108,7 @@ def plot_temp(df, ax):
     # Have to set the actual values used for colormapping separately.
     lc = LineCollection(segments, cmap=cmap, norm=norm)
     lc.set_array(y_fine_res)
-    lc.set_linewidth(3)
+    lc.set_linewidth(6)
 
     ax.add_collection(lc)
 
@@ -103,14 +137,14 @@ def plot_precipitation(df, ax):
 
 def add_weather_symbols(df, ax, symbol_interval=3):
     for index, row in df.iterrows():
-        if divmod(row["from"].hour, symbol_interval)[1] == 0:
-            sym = os.path.join(
-                constants.WEATHER_SYMBOLS_DIR, "png", row["symbol"] + ".png"
-            )
-            img = matplotlib.image.imread(sym, format="png")
-            imagebox = OffsetImage(img, zoom=0.15)
+        if row["from_local"].hour % symbol_interval == 0:
+            with importlib.resources.path(
+                "meteogram.weather_symbols.png", f'{row["symbol"]}.png'
+            ) as file:
+                img = matplotlib.image.imread(file, format="png")
+            imagebox = OffsetImage(img, zoom=0.20)
             x_pos = row["from_mpl"]
-            y_pos = row["temp_smoothed"] + _pixel_to_units(5, "v", ax)
+            y_pos = row["temp_smoothed"] + _pixel_to_units(0, "v", ax)
             ab = AnnotationBbox(
                 imagebox, (x_pos, y_pos), frameon=False, box_alignment=(0.5, 0)
             )
@@ -119,7 +153,7 @@ def add_weather_symbols(df, ax, symbol_interval=3):
 
 def add_wind_arrows(df, ax, symbol_interval=3):
     for index, row in df.iterrows():
-        if divmod(row["from"].hour, symbol_interval)[1] == 0:
+        if row["from_local"].hour % symbol_interval == 0:
             windspeed_knots = row["wind_speed"] * 3600 / 1852
             windspeed_x = windspeed_knots * np.sin(
                 (row["wind_dir"] - 180) / 180 * np.pi
@@ -129,7 +163,7 @@ def add_wind_arrows(df, ax, symbol_interval=3):
             )
             x_pos = row["from_mpl"]
             y_pos = ax.get_ylim()[0] + _pixel_to_units(20, "v", ax)
-            ax.barbs(x_pos, y_pos, windspeed_x, windspeed_y, length=6, pivot="middle")
+            ax.barbs(x_pos, y_pos, windspeed_x, windspeed_y, length=7, pivot="middle")
 
 
 def format_axes(ax1, ax2):
@@ -143,7 +177,7 @@ def format_axes(ax1, ax2):
     # ax1.set_yticks(range(-40, 50, 1), minor=False)
     # ax1.set_yticks(range(-40, 50, 1), minor=True)
     ax1.autoscale()
-    ax1.set_ylim(bottom=np.floor(ax1.get_ylim()[0]), top=np.ceil(ax1.get_ylim()[1] + 1))
+    ax1.set_ylim(bottom=np.floor(ax1.get_ylim()[0]), top=np.ceil(ax1.get_ylim()[1] + 0))
     ax1.yaxis.set_major_locator(MaxNLocator(integer=True))
 
     ax2.set_ylim(bottom=0, top=2)
@@ -167,8 +201,8 @@ def format_axes(ax1, ax2):
     ax1.spines["top"].set_visible(False)
     ax2.spines["top"].set_visible(False)
 
-    # ax1.set_ylabel('Temperatur [℃]')
-    # ax2.set_ylabel('Nedbør [mm/h]')
+    # ax1.set_ylabel("Temperatur [°C]")
+    # ax2.set_ylabel("Nedbør [mm/h]")
 
     ax1.figure.tight_layout(pad=0.2)
 

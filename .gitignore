@@ -99,3 +99,9 @@ ENV/
 
 # mypy
 .mypy_cache/
+
+# VS Code
+/.vscode/settings.json
+
+# requests-cache files
+/*.sqlite
