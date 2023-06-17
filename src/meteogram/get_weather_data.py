@@ -43,7 +43,6 @@ def get_hourly_forecast(location: Location) -> pd.DataFrame:
 
     rows = []
     for time in data["properties"]["timeseries"]:
-
         if "next_1_hours" not in time["data"].keys():
             # This data point does not have information about next 1 hour
             continue

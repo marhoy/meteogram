@@ -20,15 +20,14 @@ from meteogram import config
 
 def meteogram(
     data: pd.DataFrame,
-    hours: int = None,
-    symbol_interval: int = None,
-    locale: str = None,
-    timezone: str = None,
+    hours: int | None = None,
+    symbol_interval: int | None = None,
+    locale: str | None = None,
+    timezone: str | None = None,
     bgcolor=None,
-    size_x: int = None,
-    size_y: int = None,
+    size_x: int | None = None,
+    size_y: int | None = None,
 ) -> Figure:
-
     if hours is None:
         hours = config.HOURS
     if symbol_interval is None:

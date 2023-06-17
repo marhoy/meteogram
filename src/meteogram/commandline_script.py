@@ -4,7 +4,6 @@ import meteogram
 
 
 def main():
-
     # with open("config.yaml", 'r') as yamlfile:
     #     cfg = yaml.load(yamlfile)
 
