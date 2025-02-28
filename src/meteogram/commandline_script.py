@@ -1,9 +1,13 @@
+"""CLI script for generating meteograms."""
+
 import argparse
 
-import meteogram
+from meteogram import config, meteogram
+from meteogram.get_weather_data import get_hourly_forecast
 
 
-def main():
+def main() -> None:
+    """Generate a meteogram from the command line."""
     # with open("config.yaml", 'r') as yamlfile:
     #     cfg = yaml.load(yamlfile)
 
@@ -13,30 +17,43 @@ def main():
     parser.add_argument(
         "-p",
         "--place",
-        default=meteogram.DEFAULT_PLACE,
+        default=config.LOCATION,
         help="The yr.no place to generate meteogram for",
     )
     parser.add_argument(
         "-t",
         "--hours",
         type=int,
-        default=meteogram.DEFAULT_HOURS,
+        default=config.HOURS,
         help="How many hours to forecast",
     )
     parser.add_argument(
-        "-s", "--symbol-interval", type=int, default=meteogram.DEFAULT_SYMBOL_INTERVAL
+        "-s",
+        "--symbol-interval",
+        type=int,
+        default=config.SYMBOL_INTERVAL,
     )
-    parser.add_argument("-l", "--locale", default=meteogram.DEFAULT_LOCALE)
-    parser.add_argument("-o", "--output-file", default="meteogram.png")
+    parser.add_argument(
+        "-l",
+        "--locale",
+        default=config.LOCALE,
+    )
+    parser.add_argument(
+        "-o",
+        "--output-file",
+        default="meteogram.png",
+    )
     arguments = parser.parse_args()
 
-    fig = meteogram.meteogram(
-        place=arguments.place,
+    data = get_hourly_forecast(arguments.place)
+
+    fig = meteogram(
+        data=data,
         hours=arguments.hours,
         symbol_interval=arguments.symbol_interval,
         locale=arguments.locale,
     )
-    fig.savefig(arguments.output_file, facecolor=meteogram.DEFAULT_BGCOLOR)
+    fig.savefig(arguments.output_file, facecolor=config.BGCOLOR)
 
 
 if __name__ == "__main__":

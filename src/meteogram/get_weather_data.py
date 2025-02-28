@@ -30,11 +30,8 @@ def get_hourly_forecast(location: Location) -> pd.DataFrame:
     data = response.json()
 
     # Log info about caching
-    if response.from_cache:  # type: ignore
-        logger.debug(
-            "Returned a cached response. "
-            f"Expires at {response.expires} GMT"  # type: ignore
-        )
+    if response.from_cache:
+        logger.debug(f"Returned a cached response. Expires at {response.expires} GMT")
     else:
         logger.debug(
             "Retreived new data from api.met.no. "
@@ -43,14 +40,14 @@ def get_hourly_forecast(location: Location) -> pd.DataFrame:
 
     rows = []
     for time in data["properties"]["timeseries"]:
-        if "next_1_hours" not in time["data"].keys():
+        if "next_1_hours" not in time["data"]:
             # This data point does not have information about next 1 hour
             continue
 
         instant_details = time["data"]["instant"]["details"]
         next_1_hour_details = time["data"]["next_1_hours"]
 
-        row = dict()
+        row = {}
         row["from"] = pd.to_datetime(time["time"])
         row["temp"] = float(instant_details["air_temperature"])
         row["wind_dir"] = float(instant_details["wind_from_direction"])
@@ -68,6 +65,4 @@ def get_hourly_forecast(location: Location) -> pd.DataFrame:
 
         rows.append(row)
 
-    df = pd.DataFrame(rows)
-
-    return df
+    return pd.DataFrame(rows)

@@ -1,11 +1,11 @@
 """Package wide configuration."""
 
-from pydantic import BaseConfig
+from pydantic_settings import BaseSettings
 
 from .schemas import Location
 
 
-class Config(BaseConfig):
+class Config(BaseSettings):
     """Config class."""
 
     # Default location: Royal Castle
@@ -23,7 +23,7 @@ class Config(BaseConfig):
     HORIZONTAL_SIZE: int = 114 * 3 + 5 * 2
     VERTICAL_SIZE: int = 114 * 2 + 5 * 1
 
-    BGCOLOR = (0.95, 0.95, 0.95)
+    BGCOLOR: tuple[float, float, float] = (0.95, 0.95, 0.95)
 
 
 config = Config()

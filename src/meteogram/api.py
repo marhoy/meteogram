@@ -1,35 +1,32 @@
 """REST API."""
 
 import io
+from typing import Annotated
 
-import fastapi
-import pydantic
-from fastapi import FastAPI
+from fastapi import FastAPI, Query
 from starlette.responses import StreamingResponse
 
 import meteogram
 from meteogram.get_weather_data import get_hourly_forecast
 from meteogram.schemas import Location
 
+
+class QueryParams(Location):
+    """Query parameters."""
+
+    hours: int | None = None
+
+
 app = FastAPI()
 
 
 @app.get("/")
-def get_meteogram(
-    lat: float, lon: float, altitude: int | None = None, hours: int | None = None
-):
+def get_meteogram(query: Annotated[QueryParams, Query()]) -> StreamingResponse:
     """Return a meteogram as a png-image."""
-    try:
-        location = Location(lat=lat, lon=lon, altitude=altitude)
-    except pydantic.ValidationError:
-        raise fastapi.HTTPException(
-            status_code=422,
-            detail=f"Illegal location: Latitude {lat}, Longitude {lon}",
-        )
-
+    location = Location.model_validate(query.model_dump())
     data = get_hourly_forecast(location)
 
-    fig = meteogram.meteogram(data, hours=hours)
+    fig = meteogram.meteogram(data, hours=query.hours)
     img = io.BytesIO()
     fig.savefig(img)
     img.seek(0)
