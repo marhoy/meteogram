@@ -1,9 +1,8 @@
 [project]
 name = "meteogram"
-description = "Create meteogram based on data from yr.no"
+description = "Create meteogram based on data from met.no"
 authors = [{ name = "Martin Høy", email = "martin@hoy.priv.no" }]
 readme = "README.md"
-license = { file = "LICENSE" }
 dynamic = ["version"]
 requires-python = ">=3.10"
 
