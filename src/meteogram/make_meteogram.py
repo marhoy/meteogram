@@ -1,52 +1,45 @@
+"""Code for creating a meteogram."""
+
+import contextlib
 import importlib.resources
 import locale as python_locale
+from typing import Literal
 
-import matplotlib
+import matplotlib as mpl
 import matplotlib.dates
 import matplotlib.image
 import numpy as np
 import pandas as pd
-import scipy.interpolate
-import scipy.signal
+from matplotlib.axes import Axes
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.collections import LineCollection
 from matplotlib.colors import BoundaryNorm, ListedColormap
 from matplotlib.figure import Figure
 from matplotlib.offsetbox import AnnotationBbox, OffsetImage
 from matplotlib.ticker import MaxNLocator
+from scipy.interpolate import interp1d
+from scipy.signal import savgol_filter
 
 from meteogram import config
+from meteogram.get_weather_data import get_hourly_forecast
+from meteogram.schemas import Location
 
 
-def meteogram(
-    data: pd.DataFrame,
-    hours: int | None = None,
-    symbol_interval: int | None = None,
-    locale: str | None = None,
-    timezone: str | None = None,
-    bgcolor=None,
-    size_x: int | None = None,
-    size_y: int | None = None,
+def create_meteogram(
+    location: Location,
+    hours: int = config.HOURS,
+    symbol_interval: int = config.SYMBOL_INTERVAL,
+    locale: str = config.LOCALE,
+    timezone: str = config.TIMEZONE,
+    bgcolor: tuple[float, float, float] = config.BGCOLOR,
+    size_x: int = config.HORIZONTAL_SIZE,
+    size_y: int = config.VERTICAL_SIZE,
 ) -> Figure:
-    if hours is None:
-        hours = config.HOURS
-    if symbol_interval is None:
-        symbol_interval = config.SYMBOL_INTERVAL
-    if locale is None:
-        locale = config.LOCALE
-    if timezone is None:
-        timezone = config.TIMEZONE
-    if bgcolor is None:
-        bgcolor = config.BGCOLOR
-    if size_x is None:
-        size_x = config.HORIZONTAL_SIZE
-    if size_y is None:
-        size_y = config.VERTICAL_SIZE
+    """Create a meteogram."""
+    data = get_hourly_forecast(location)
 
-    try:
+    with contextlib.suppress(python_locale.Error):
         python_locale.setlocale(python_locale.LC_ALL, locale)
-    except python_locale.Error:
-        pass
 
     # Use only the first n elements. The first element includes the current hour.
     now_1h = pd.Timestamp.utcnow().floor("1h")
@@ -54,13 +47,13 @@ def meteogram(
     last_datapoint = first_datapoint + hours
     data = data.iloc[first_datapoint:last_datapoint].copy()
 
-    # Convert the timestamps to naïve, local timezone
+    # Convert the timestamps to naïve, in local timezone
     data["from_local"] = data["from"].dt.tz_convert(timezone).dt.tz_localize(tz=None)
     # Create a new column with a Matplotlib-friendly datetimes
     data["from_mpl"] = matplotlib.dates.date2num(data["from_local"])
 
     # Set overall font size
-    matplotlib.rc("font", size=14.5)
+    mpl.rc("font", size=14.5)
 
     # Create the figure canvas and axes
     fig_size = (size_x / config.DPI, size_y / config.DPI)
@@ -81,13 +74,14 @@ def meteogram(
     return fig
 
 
-def plot_temp(df, ax):
-    t = df["from_mpl"].values
-    y = df["temp"].values
+def plot_temp(df: pd.DataFrame, ax: Axes) -> None:
+    """Plot temperature."""
+    t = df["from_mpl"].to_numpy()
+    y = df["temp"].to_numpy()
 
     t_fine_res = np.linspace(t[0], t[-1], 1000)
-    y_smooth = scipy.signal.savgol_filter(y, 3, 1)
-    y_fine_res = scipy.interpolate.interp1d(t, y_smooth, kind="slinear")(t_fine_res)
+    y_smooth = savgol_filter(y, 3, 1)
+    y_fine_res = interp1d(t, y_smooth, kind="slinear")(t_fine_res)
 
     df["temp_smoothed"] = y_smooth
 
@@ -112,7 +106,8 @@ def plot_temp(df, ax):
     ax.add_collection(lc)
 
 
-def plot_precipitation(df, ax):
+def plot_precipitation(df: pd.DataFrame, ax: Axes) -> None:
+    """Plot precipitation."""
     t = df["from_mpl"]
     y = df["precip"]
     y_min = df["precip_min"]
@@ -128,17 +123,18 @@ def plot_precipitation(df, ax):
             ax.text(
                 bar.get_x() + bar.get_width() / 2,
                 bar.get_height() + _pixel_to_units(5, "v", ax),
-                "{:3.1f}".format(bar.get_height()),
+                f"{bar.get_height():3.1f}",
                 ha="center",
                 size="xx-small",
             )
 
 
-def add_weather_symbols(df, ax, symbol_interval=3):
-    for index, row in df.iterrows():
+def add_weather_symbols(df: pd.DataFrame, ax: Axes, symbol_interval: int = 3) -> None:
+    """Add weather symbols to the meteogram."""
+    for _, row in df.iterrows():
         if row["from_local"].hour % symbol_interval == 0:
             with importlib.resources.path(
-                "meteogram.weather_symbols.png", f'{row["symbol"]}.png'
+                "meteogram.weather_symbols.png", f"{row['symbol']}.png"
             ) as file:
                 img = matplotlib.image.imread(file, format="png")
             imagebox = OffsetImage(img, zoom=0.20)
@@ -150,8 +146,9 @@ def add_weather_symbols(df, ax, symbol_interval=3):
             ax.add_artist(ab)
 
 
-def add_wind_arrows(df, ax, symbol_interval=3):
-    for index, row in df.iterrows():
+def add_wind_arrows(df: pd.DataFrame, ax: Axes, symbol_interval: int = 3) -> None:
+    """Add wind arrows to the meteogram."""
+    for _, row in df.iterrows():
         if row["from_local"].hour % symbol_interval == 0:
             windspeed_knots = row["wind_speed"] * 3600 / 1852
             windspeed_x = windspeed_knots * np.sin(
@@ -165,7 +162,8 @@ def add_wind_arrows(df, ax, symbol_interval=3):
             ax.barbs(x_pos, y_pos, windspeed_x, windspeed_y, length=7, pivot="middle")
 
 
-def format_axes(ax1, ax2):
+def format_axes(ax1: Axes, ax2: Axes) -> None:
+    """Format the axes."""
     days = matplotlib.dates.DayLocator()
     # noon = matplotlib.dates.HourLocator(byhour=range(12, 24, 12))
     day_format = matplotlib.dates.DateFormatter("%A")
@@ -206,11 +204,12 @@ def format_axes(ax1, ax2):
     ax1.figure.tight_layout(pad=0.2)
 
 
-def round_base(x, base=5):
+def round_base(x: float, base: int = 5) -> int:
+    """Round a float to the nearest base."""
     return int(base * np.floor(x / base))
 
 
-def _get_ax_size_pixels(ax):
+def _get_ax_size_pixels(ax: Axes) -> tuple[float, float]:
     fig = ax.figure
     bbox = ax.get_window_extent().transformed(fig.dpi_scale_trans.inverted())
     width = bbox.width * fig.dpi
@@ -218,7 +217,7 @@ def _get_ax_size_pixels(ax):
     return width, height
 
 
-def _pixel_to_units(pixels, direction, ax):
+def _pixel_to_units(pixels: int, direction: Literal["h", "v"], ax: Axes) -> float:
     if direction == "h":
         ax_size_units = ax.get_xlim()[1] - ax.get_xlim()[0]
         ax_size_pixels = _get_ax_size_pixels(ax)[0]
@@ -227,5 +226,4 @@ def _pixel_to_units(pixels, direction, ax):
         ax_size_pixels = _get_ax_size_pixels(ax)[1]
     else:
         raise Exception
-    units = pixels * ax_size_units / ax_size_pixels
-    return units
+    return pixels * ax_size_units / ax_size_pixels

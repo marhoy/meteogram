@@ -1,0 +1,15 @@
+# Exclude all files
+*
+
+# Include only these files / directories
+!locale.gen
+!README.md
+!pyproject.toml
+!uv.lock
+!.python-version
+!Dockerfile.*
+!src/
+!docs/
+
+# Exclude any __pycache__ directories
+**/__pycache__/

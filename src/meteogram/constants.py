@@ -1,18 +1,18 @@
 """Package wide configuration."""
 
-from pydantic import BaseConfig
+from pydantic_settings import BaseSettings
 
 from .schemas import Location
 
 
-class Config(BaseConfig):
+class Config(BaseSettings):
     """Config class."""
 
-    # Default location: Royal Castle
+    # Default location: Norwegian Royal Castle
     LOCATION: Location = Location(lat=59.916948, lon=10.728118, altitude=32)
 
     TIMEZONE: str = "Europe/Oslo"
-    LOCALE: str = "nb_NO.UTF-8"
+    LOCALE: str = "no_NO.UTF-8"
 
     HOURS: int = 24
     SYMBOL_INTERVAL: int = 3
@@ -23,7 +23,7 @@ class Config(BaseConfig):
     HORIZONTAL_SIZE: int = 114 * 3 + 5 * 2
     VERTICAL_SIZE: int = 114 * 2 + 5 * 1
 
-    BGCOLOR = (0.95, 0.95, 0.95)
+    BGCOLOR: tuple[float, float, float] = (0.95, 0.95, 0.95)
 
 
 config = Config()

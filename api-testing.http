@@ -10,7 +10,7 @@ User-Agent: rest-client
 
 ###
 
-GET http://localhost:8000
+GET http://localhost:5000
     ?lat=59.916948
     &lon=10.728118
     &altitude=32
