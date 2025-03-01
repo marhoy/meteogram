@@ -1,0 +1,42 @@
+site_name: meteogram
+site_url: !ENV READTHEDOCS_CANONICAL_URL
+repo_url: https://github.com/marhoy/meteogram
+repo_name: marhoy/meteogram
+
+nav:
+  - Home: index.md
+  - Usage: usage.md
+
+theme:
+  name: material
+  palette:
+    primary: amber
+  favicon: images/favicon.svg
+  icon:
+    logo: material/weather-cloudy-arrow-right
+    repo: fontawesome/brands/github
+  custom_dir: docs/overrides
+  features:
+    - navigation.expand
+    - navigation.footer
+    - content.code.copy
+    - search.highlight
+    - search.share
+
+extra:
+  generator: false
+
+markdown_extensions:
+  - admonition
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.superfences
+
+plugins:
+  - search
+#  - git-revision-date-localized:
+#      enable_creation_date: true
+
+extra_javascript:
+  #  - javascript/readthedocs-search.js
+  - javascript/readthedocs-menu.js
