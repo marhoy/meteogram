@@ -10,8 +10,8 @@ Documentation is available on [Read the Docs](https://meteogram.readthedocs.io/)
 
 Examples:
 
-![Example 1](https://raw.githubusercontent.com/marhoy/meteogram/main/docs/images/example_meteogram.png)
+![Example 1](https://raw.githubusercontent.com/marhoy/meteogram/main/docs/images/meteogram_oslo.png)
 
-![Example 2](https://raw.githubusercontent.com/marhoy/meteogram/main/docs/images/example_meteogram_warm.png)
+![Example 2](https://raw.githubusercontent.com/marhoy/meteogram/main/docs/images/meteogram_snow.png)
 
-![Example 3](https://raw.githubusercontent.com/marhoy/meteogram/main/docs/images/example_meteogram_default.png)
+![Example 3](https://raw.githubusercontent.com/marhoy/meteogram/main/docs/images/meteogram_small.png)

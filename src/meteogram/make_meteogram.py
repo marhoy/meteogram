@@ -12,17 +12,18 @@ import numpy as np
 import pandas as pd
 from matplotlib.axes import Axes
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
-from matplotlib.collections import LineCollection
 from matplotlib.colors import BoundaryNorm, ListedColormap
 from matplotlib.figure import Figure
 from matplotlib.offsetbox import AnnotationBbox, OffsetImage
 from matplotlib.ticker import MaxNLocator
-from scipy.interpolate import interp1d
-from scipy.signal import savgol_filter
+from scipy.interpolate import make_interp_spline, make_smoothing_spline
 
 from meteogram import config
 from meteogram.get_weather_data import get_hourly_forecast
 from meteogram.schemas import Location
+
+# Maximum height of precipitation bars
+MAX_PERCIPITATION = 2  # mm/hour
 
 
 def create_meteogram(
@@ -79,31 +80,27 @@ def plot_temp(df: pd.DataFrame, ax: Axes) -> None:
     t = df["from_mpl"].to_numpy()
     y = df["temp"].to_numpy()
 
-    t_fine_res = np.linspace(t[0], t[-1], 1000)
-    y_smooth = savgol_filter(y, 3, 1)
-    y_fine_res = interp1d(t, y_smooth, kind="slinear")(t_fine_res)
+    # First, we smooth the original data points from met.no
+    smooth = make_smoothing_spline(t, y, lam=1e-4)  # maybe 1e-5
+    y_smooth = smooth(t)
 
+    # Then, we make a high-resolution interpolation of the smoothed data
+    interpolate = make_interp_spline(t, y_smooth, k=2)
+    t_high_res = np.linspace(t[0], t[-1], 10_000)
+    y_high_res = interpolate(t_high_res)
+
+    # Save the smoothed data back to the dataframe, it will be used for placing the
+    # weather symbols
     df["temp_smoothed"] = y_smooth
 
-    # Create a colormap for red, green and blue and a norm to color
-    # f < -0.5 blue, f > 0.5 red
+    # Create a colormap with blue, purple and red colors
     cmap = ListedColormap(["#007CB2", "#7B3C7B", "#BC1616"])
     norm = BoundaryNorm([-1e3, -1, 1, 1e3], cmap.N)
 
-    # Create a set of line segments so that we can color them individually
-    # This creates the points as a N x 1 x 2 array so that we can stack points
-    # together easily to get the segments. The segments array for line collection
-    # needs to be numlines x points per line x 2 (x and y)
-    points = np.array([t_fine_res, y_fine_res]).T.reshape(-1, 1, 2)
-    segments = np.concatenate([points[:-1], points[1:]], axis=1)
-
-    # Create the line collection object, setting the colormapping parameters.
-    # Have to set the actual values used for colormapping separately.
-    lc = LineCollection(segments, cmap=cmap, norm=norm)
-    lc.set_array(y_fine_res)
-    lc.set_linewidth(6)
-
-    ax.add_collection(lc)
+    # Add the high-resolution data to the axes
+    ax.scatter(t_high_res, y_high_res, c=cmap(norm(y_high_res)), s=20)
+    # For debugging, plot the original data points
+    # ax.scatter(t, y, c="k", s=30)
 
 
 def plot_precipitation(df: pd.DataFrame, ax: Axes) -> None:
@@ -113,17 +110,19 @@ def plot_precipitation(df: pd.DataFrame, ax: Axes) -> None:
     y_min = df["precip_min"]
     y_max = df["precip_max"]
 
+    # Create the precipitation bars for forecast, min and max
     bars = ax.bar(t, y, align="edge", color="C0", alpha=0.5, width=1 / 24)
     ax.bar(t, y_min, align="edge", color="C0", alpha=0.3, width=1 / 24)
     ax.bar(t, y_max, align="edge", color="C0", alpha=0.2, width=1 / 24)
 
+    # Add text labels to the precipitation bars
     for bar in bars:
         height = bar.get_height()
         if height > 0:
             ax.text(
                 bar.get_x() + bar.get_width() / 2,
-                bar.get_height() + _pixel_to_units(5, "v", ax),
-                f"{bar.get_height():3.1f}",
+                min(MAX_PERCIPITATION, bar.get_height() + _pixel_to_units(5, "v", ax)),
+                f"{bar.get_height():3.1f}".removeprefix("0"),
                 ha="center",
                 size="xx-small",
             )
@@ -177,7 +176,7 @@ def format_axes(ax1: Axes, ax2: Axes) -> None:
     ax1.set_ylim(bottom=np.floor(ax1.get_ylim()[0]), top=np.ceil(ax1.get_ylim()[1] + 0))
     ax1.yaxis.set_major_locator(MaxNLocator(integer=True))
 
-    ax2.set_ylim(bottom=0, top=2)
+    ax2.set_ylim(bottom=0, top=MAX_PERCIPITATION)
     ax2.yaxis.set_major_locator(MaxNLocator(integer=True))
 
     ax1.xaxis.set_major_locator(days)
@@ -200,6 +199,9 @@ def format_axes(ax1: Axes, ax2: Axes) -> None:
 
     # ax1.set_ylabel("Temperatur [°C]")
     # ax2.set_ylabel("Nedbør [mm/h]")
+
+    # Place the grid behind the data
+    ax1.set_axisbelow(True)
 
     ax1.figure.tight_layout(pad=0.2)
 
