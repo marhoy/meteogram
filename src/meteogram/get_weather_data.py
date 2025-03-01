@@ -25,7 +25,7 @@ def get_hourly_forecast(location: Location) -> pd.DataFrame:
     headers = {
         "User-Agent": "https://github.com/marhoy/meteogram",
     }
-    response = session.get(url, headers=headers, params=location.dict())
+    response = session.get(url, headers=headers, params=location.model_dump())
     response.raise_for_status()
     data = response.json()
 

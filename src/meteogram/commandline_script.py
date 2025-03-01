@@ -2,7 +2,7 @@
 
 import argparse
 
-from meteogram import config, meteogram
+from meteogram import config, create_meteogram
 from meteogram.get_weather_data import get_hourly_forecast
 
 
@@ -47,7 +47,7 @@ def main() -> None:
 
     data = get_hourly_forecast(arguments.place)
 
-    fig = meteogram(
+    fig = create_meteogram(
         data=data,
         hours=arguments.hours,
         symbol_interval=arguments.symbol_interval,
