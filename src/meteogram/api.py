@@ -50,6 +50,10 @@ def get_meteogram(query: Annotated[QueryParams, Query()]) -> Response:
     - size_x: Horizontal size in pixels
     - size_y: Vertical size in pixels
     - dpi: Dots per inch (resolution) to use when rendering the image
+
+    Example requests:
+    - [Example 1](/meteogram?altitude=100&lat=60&lon=10&hours=24&locale=nb_NO.UTF-8)
+
     """
     location = Location.model_validate(query.model_dump())
     fig = meteogram.create_meteogram(

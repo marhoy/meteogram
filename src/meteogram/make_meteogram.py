@@ -42,16 +42,22 @@ def create_meteogram(
     with contextlib.suppress(python_locale.Error):
         python_locale.setlocale(python_locale.LC_ALL, locale)
 
+    # Convert the timestamps to naïve, in local timezone
+    data["from_local"] = data["from"].dt.tz_convert(timezone).dt.tz_localize(tz=None)
+    # Create a new column with a Matplotlib-friendly local datetimes
+    data["from_mpl"] = matplotlib.dates.date2num(data["from_local"])
+
+    # When the clock is set back (DST ends), we will have duplicate timestamps. We
+    # remove these by keeping only the first occurrence, to avoid duplicate local
+    # timestamps.
+    if data.duplicated(subset=["from_local"]).any():
+        data = data.drop_duplicates(subset=["from_local"])
+
     # Use only the first n elements. The first element includes the current hour.
     now_1h = pd.Timestamp.utcnow().floor("1h")
     first_datapoint = (data["from"] >= now_1h).argmax()
     last_datapoint = first_datapoint + hours
     data = data.iloc[first_datapoint:last_datapoint].copy()
-
-    # Convert the timestamps to naïve, in local timezone
-    data["from_local"] = data["from"].dt.tz_convert(timezone).dt.tz_localize(tz=None)
-    # Create a new column with a Matplotlib-friendly datetimes
-    data["from_mpl"] = matplotlib.dates.date2num(data["from_local"])
 
     # Set overall font size
     mpl.rc("font", size=14.5)
@@ -121,8 +127,8 @@ def plot_precipitation(df: pd.DataFrame, ax: Axes) -> None:
         if height > 0:
             ax.text(
                 bar.get_x() + bar.get_width() / 2,
-                min(MAX_PERCIPITATION, bar.get_height() + _pixel_to_units(5, "v", ax)),
-                f"{bar.get_height():3.1f}".removeprefix("0"),
+                min(MAX_PERCIPITATION, height + _pixel_to_units(5, "v", ax)),
+                f"{height:3.1f}".removeprefix("0"),
                 ha="center",
                 size="xx-small",
             )
