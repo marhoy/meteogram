@@ -45,24 +45,20 @@ def get_hourly_forecast(location: Location) -> pd.DataFrame:
             continue
 
         instant_details = time["data"]["instant"]["details"]
-        next_1_hour_details = time["data"]["next_1_hours"]
+        next_1_hour = time["data"]["next_1_hours"]
 
-        row = {}
-        row["from"] = pd.to_datetime(time["time"])
-        row["temp"] = float(instant_details["air_temperature"])
-        row["wind_dir"] = float(instant_details["wind_from_direction"])
-        row["wind_speed"] = float(instant_details["wind_speed"])
-        row["pressure"] = float(instant_details["air_pressure_at_sea_level"])
-
-        row["symbol"] = next_1_hour_details["summary"]["symbol_code"]
-        row["precip"] = float(next_1_hour_details["details"]["precipitation_amount"])
-        row["precip_min"] = float(
-            next_1_hour_details["details"].get("precipitation_amount_min", 0)
+        rows.append(
+            {
+                "from": pd.to_datetime(time["time"]),
+                "temp": instant_details["air_temperature"],
+                "wind_dir": instant_details["wind_from_direction"],
+                "wind_speed": instant_details["wind_speed"],
+                "pressure": instant_details["air_pressure_at_sea_level"],
+                "symbol": next_1_hour["summary"]["symbol_code"],
+                "precip": next_1_hour["details"]["precipitation_amount"],
+                "precip_min": next_1_hour["details"].get("precipitation_amount_min", 0),
+                "precip_max": next_1_hour["details"].get("precipitation_amount_max", 0),
+            }
         )
-        row["precip_max"] = float(
-            next_1_hour_details["details"].get("precipitation_amount_max", 0)
-        )
-
-        rows.append(row)
 
     return pd.DataFrame(rows)
