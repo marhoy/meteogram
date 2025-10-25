@@ -3,7 +3,6 @@
 import argparse
 
 from meteogram import config, create_meteogram
-from meteogram.get_weather_data import get_hourly_forecast
 
 
 def main() -> None:
@@ -16,9 +15,9 @@ def main() -> None:
     )
     parser.add_argument(
         "-p",
-        "--place",
+        "--position",
         default=config.LOCATION,
-        help="The yr.no place to generate meteogram for",
+        help="The yr.no position to generate meteogram for",
     )
     parser.add_argument(
         "-t",
@@ -45,10 +44,8 @@ def main() -> None:
     )
     arguments = parser.parse_args()
 
-    data = get_hourly_forecast(arguments.place)
-
     fig = create_meteogram(
-        data=data,
+        location=arguments.place,
         hours=arguments.hours,
         symbol_interval=arguments.symbol_interval,
         locale=arguments.locale,
